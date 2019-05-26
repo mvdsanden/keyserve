@@ -22,7 +22,7 @@ fi
 mkdir "$MVDS_PROJECT_BASE_DIRECTORY/src/applications/$APPNAME"
 mkdir "$MVDS_PROJECT_BASE_DIRECTORY/src/applications/$APPNAME/application"
 
-$BASE/gen_application_main.sh > "$MVDS_PROJECT_BASE_DIRECTORY/src/applications/$APPNAME/$APPNAME.m.cpp"
+$BASE/gen_application_main.sh "$APPNAME" > "$MVDS_PROJECT_BASE_DIRECTORY/src/applications/$APPNAME/$APPNAME.m.cpp"
 
 echo $APPNAME.m >> "$MVDS_PROJECT_BASE_DIRECTORY/src/applications/$APPNAME/application/members"
 
