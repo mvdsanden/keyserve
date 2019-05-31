@@ -1,9 +1,14 @@
 #!/bin/bash
 
 BASE="$(dirname ${BASH_SOURCE[0]})"
+source $BASE/config.sh
 
 ADAPTERNAME=$1
 
+if [ "" = "$ADAPTERNAME" ]; then
+    echo "Please specify an adapter name."
+    exit 1
+fi
 
 if [ ! -d "$MVDS_PROJECT_BASE_DIRECTORY/src/adapters" ]; then
     mkdir "$MVDS_PROJECT_BASE_DIRECTORY/src/adapters"
