@@ -19,12 +19,12 @@ namespace {
 int main(int argc, char *argv[])
 {
   ksrv::CommandlineArguments args;
-  if (!ksrv::CommandlineArgumentsUtil::parse(argc, argv)) {
+  if (!ksrv::CommandlineArgumentsUtil::parse(&args, argc, argv)) {
     return 1;
   }
 
   ksrv::Configuration config;
-  if (!ksrv::ConfigurationUtil::readConfigurationFrom(&config, args)) {
+  if (!ksrv::ConfigurationUtil::readConfiguration(&config, args)) {
     return 2;
   }
 
@@ -38,7 +38,8 @@ int main(int argc, char *argv[])
     return 4;
   }
 
-  ksrv::CachingKeyStore            cachingKeyStore(keyStore.get(), config);
+  ksrv::CachingKeyStore cachingKeyStore(keyStore.get(), config);
+  
   a_ksvc::ServiceFactory           serviceFactory(config);
   a_ksvc::ServiceFactory::Services services =
       serviceFactory.createConfigured(&services, &cachingKeyStore);
