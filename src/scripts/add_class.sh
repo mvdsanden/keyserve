@@ -14,12 +14,14 @@ addGroupClass(){
 
     GROUPNAME=$1
     PKGNAME=$2
-
+    
     if [ "" = "$GROUPNAME" ] || [ "" = "$PKGNAME" ]; then
 	echo "Please run this script in the package root directory."
 	exit 2
     fi
 
+    echo "Adding group class"
+    
     NAMEBASE="${PKGNAME,,}_${CLASSNAME,,}"
     
     if grep -xq "$NAMEBASE" package/members; then
