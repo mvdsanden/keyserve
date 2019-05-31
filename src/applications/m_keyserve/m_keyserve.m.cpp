@@ -1,9 +1,17 @@
 // m_keyserve.m.cpp                                              -*-c++-*-
+#include <ksrc_commandlinearguments.h>
+#include <ksrc_configuration.h>
+#include <a_kstores_keystorefactory.h>
+#include <ksrv_cachingkeystore.h>
+#include <ksrv_servicefactory.h>
+#include <a_ksrvs_servicefactory.h>
+
 #include <iostream>
+#include <memory>
 
 namespace {
 
-  bool startAllServices(a_ksvc::ServiceFactory::Services* services)
+  bool startAllServices(ksrv::ServiceFactory::Services* services)
   {
     size_t success = 0;
 
@@ -20,6 +28,7 @@ int main(int argc, char *argv[])
 {
   ksrv::CommandlineArguments args;
   if (!ksrv::CommandlineArgumentsUtil::parse(&args, argc, argv)) {
+    ksrv::CommandLineArgumentsUtil::printUsage(argc, argv);
     return 1;
   }
 
@@ -28,7 +37,7 @@ int main(int argc, char *argv[])
     return 2;
   }
 
-  a_kstore::KeyStoreFactory       keyStoreFactory(config);
+  a_kstores::KeyStoreFactory      keyStoreFactory(config);
   std::unique_ptr<ksrv::KeyStore> keyStore = keyStoreFactory.create();
   if (!keyStore) {
     return 3;
@@ -39,9 +48,9 @@ int main(int argc, char *argv[])
   }
 
   ksrv::CachingKeyStore cachingKeyStore(keyStore.get(), config);
-  
-  a_ksvc::ServiceFactory           serviceFactory(config);
-  a_ksvc::ServiceFactory::Services services =
+
+  a_ksvcs::ServiceFactory        serviceFactory(config);
+  ksrv::ServiceFactory::Services services =
       serviceFactory.createConfigured(&services, &cachingKeyStore);
 
   if (!startAllServices(&services)) {
