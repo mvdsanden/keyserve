@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
 find_package(GTest REQUIRED)
 
-SET(CMAKE_CXX_COMPILER /usr/bin/g++-8)
+SET(CMAKE_CXX_COMPILER /usr/bin/g++)
 set(CMAKE_CXX_FLAGS "-Werror -std=c++17 -ggdb")
 
 function(mvds_add_package name)
@@ -59,7 +59,7 @@ function(mvds_add_package name)
         if(EXISTS ${src})
             add_executable("${member}.g.tsk" ${src})
             target_include_directories("${member}.g.tsk" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-            target_link_libraries("${member}.g.tsk" ${name} pthread ${GTEST_LIBRARIES})
+            target_link_libraries("${member}.g.tsk" ${name} ${GTEST_LIBRARIES} pthread)
         endif()
     endforeach(member)
 
@@ -118,8 +118,13 @@ endfunction(mvds_add_application)
 function(mvds_add_adapter name)
 
     set(project_SRC "")
-
-    file(READ "${CMAKE_CURRENT_SOURCE_DIR}/adapter/members" members)
+    set(members_FILE "${CMAKE_CURRENT_SOURCE_DIR}/adapter/members")
+    
+    if(NOT EXISTS "${members_FILE}")
+      return()
+    endif()
+    
+    file(READ "${members_FILE}" members)
     STRING(REGEX REPLACE "\n" ";" members "${members}")
 
     foreach(member ${members})

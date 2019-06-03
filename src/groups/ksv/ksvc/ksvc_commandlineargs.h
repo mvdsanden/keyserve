@@ -2,6 +2,10 @@
 #ifndef INCLUDED_KSVC_COMMANDLINEARGS
 #define INCLUDED_KSVC_COMMANDLINEARGS
 
+#include <string>
+#include <vector>
+#include <memory>
+
 namespace MvdS {
 namespace ksvc {
 
@@ -14,19 +18,23 @@ class CommandlineArgs {
 
 public:
 
-  typedef std::vector<std::string> Strings;
-  
-private:
-  
-  // TYPES
+  // PUBLIC TYPES
+  typedef std::vector<std::string> Strings; 
+  struct Data;
+ 
+private:  
 
   // DATA
-  Strings d_positional;
-  Strings d_configFiles;
-
+  std::unique_ptr<Data> d_data;
+  
   // PRIVATE MANIPULATORS
 
 public:
+  // CREATORS
+  CommandlineArgs();
+
+  virtual ~CommandlineArgs();
+  
   // MANIPULATORS
   void addLong(const std::string& name, const std::string& value);
   // Add a long argument, that starts with two dashes ("--").
