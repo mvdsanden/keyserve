@@ -36,11 +36,13 @@ public:
   virtual ~CommandlineArgs();
   
   // MANIPULATORS
-  void addLong(const std::string& name, const std::string& value);
-  // Add a long argument, that starts with two dashes ("--").
+  bool parseLong(const std::string& name, const std::string& value);
+  // Parse a long argument with the specified 'name' and the specified 'value'.
+  // Return 'true' on success, false otherwise.
 
-  void addShort(const std::string& name, const std::string& value);
-  // Add a short argument, that starts with one dash ("-").
+  bool parseShort(const std::string& name, const std::string& value);
+  // Parse a short argument with the specified 'name' and the specified 'value'.
+  // Return 'true' on success, false otherwise.
   
   // ACCESSORS
   const Strings& positional() const;

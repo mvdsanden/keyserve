@@ -6,13 +6,21 @@
 using namespace MvdS;
 using namespace MvdS::ksvc;
 
+TEST(CommandlineArgsTest, addShort) {
+  // TEST ADDING A LONG ARGUMENT PAIR
+  CommandlineArgs obj;
+  obj.parseShort("c", "test");
+  ASSERT_EQ(1, obj.configFiles().size());
+  ASSERT_EQ("test", obj.configFiles().front());
+}
+
 TEST(CommandlineArgsTest, addLong) {
   // TEST ADDING A LONG ARGUMENT PAIR
   CommandlineArgs obj;
-  obj.addLong("config", "test");
+  obj.parseLong("config", "test");
   ASSERT_EQ(1, obj.configFiles().size());
+  ASSERT_EQ("test", obj.configFiles().front());
 }
-
 
 TEST(CommandlineArgsTest, Constructor) {
   // TEST CONSTRUCTOR

@@ -15,48 +15,43 @@ struct CommandlineArgs::Data
 
 namespace {
 
-#define _(x, y, z) (CommandlineArgs::Data *x, const std::string &y, const std::string &z)
-  
+ 
   struct ArgInfo {
+    // TYPES
+    typedef std::function<void(CommandlineArgs::Data *data,
+                               const std::string &name,
+                               const std::string &value)>
+        Setter;
+
     // DATA
     const std::string d_longName;
     const std::string d_shortName;
     const std::string d_description;
-    std::function<void(CommandlineArgs::Data *data, const std::string &name,
-                       const std::string &value)>
-        d_cb;
+    Setter d_setter;
   };
 
-  ArgInfo s_argList[] = {{"config", "c", "", [] _(data, name, value) {
-                       data->d_configFiles.emplace_back(value);
-                     }}};
-
-  auto s_argList[] = std::make_{{"config", "c", "", [] _(data, name, value) {
-                       data->d_configFiles.emplace_back(value);
-                     }}};
-
+#define _(x, y, z) (CommandlineArgs::Data *x, const std::string &y, const std::string &z)
   
+  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(data, name, value) {
+                                      data->d_configFiles.emplace_back(value);
+                                    }}};
+
 #undef _
 
-  const ArgInfo *findArg(const std::string &name,
-                         const std::function < bool(const std::string &name,
-                                                    const ArgInfo &arg) &
-                             cmp) {
-    const auto end = s_argList + sizeof(s_argList) / sizeof(s_argList[0]);
-    auto argIter = std::find_if(s_argList, end, cmp);
-
-    if (end == argIter) {
-      return;
-    }
+  typedef decltype(s_argList)::const_iterator ArgIterator;
+  
+  ArgIterator findArg(const std::string &name,
+                         std::function<bool(const ArgInfo &arg)> cmp) {
+    return std::find_if(std::begin(s_argList), std::end(s_argList), cmp);
   }
 
-  const ArgInfo *findArgLong(const std::string& name)
+  ArgIterator findArgLong(const std::string& name)
   {
     return findArg(name,
                    [name](const auto &arg) { return name == arg.d_longName; });
   }
 
-  const ArgInfo *findArgShort(const std::string& name)
+  ArgIterator findArgShort(const std::string& name)
   {
     return findArg(name,
                    [name](const auto &arg) { return name == arg.d_shortName; });
@@ -78,20 +73,29 @@ CommandlineArgs::CommandlineArgs()
 CommandlineArgs::~CommandlineArgs() {}
 
 // MANIPULATORS
-void CommandlineArgs::addLong(const std::string &name,
-                              const std::string &value)
-{
-  ArgInfo *arg = findArgLong(name);
+bool CommandlineArgs::parseLong(const std::string &name,
+                                const std::string &value) {
+  const auto argIter = findArgLong(name);
 
-  if (end == argIter) {
-    return;
+  if (std::end(s_argList) == argIter) {
+    return false;
   }
 
-  argIter->d_cb(d_data.get(), name, value);
+  argIter->d_setter(d_data.get(), name, value);
+  return true;
 }
 
-void CommandlineArgs::addShort(const std::string &name,
-                               const std::string &value) {}
+bool CommandlineArgs::parseShort(const std::string &name,
+                                 const std::string &value) {
+  const auto argIter = findArgShort(name);
+
+  if (std::end(s_argList) == argIter) {
+    return false;
+  }
+
+  argIter->d_setter(d_data.get(), name, value);
+  return true;
+}
 
 // ACCESSORS
 const CommandlineArgs::Strings &CommandlineArgs::positional() const {
