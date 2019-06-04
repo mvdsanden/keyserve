@@ -6,6 +6,14 @@
 using namespace MvdS;
 using namespace MvdS::ksvc;
 
+TEST(CommandlineArgsTest, addLong) {
+  // TEST ADDING A LONG ARGUMENT PAIR
+  CommandlineArgs obj;
+  obj.addLong("config", "test");
+  ASSERT_EQ(1, obj.configFiles().size());
+}
+
+
 TEST(CommandlineArgsTest, Constructor) {
   // TEST CONSTRUCTOR
   //
