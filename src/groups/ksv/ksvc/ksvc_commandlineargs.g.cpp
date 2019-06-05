@@ -6,10 +6,24 @@
 using namespace MvdS;
 using namespace MvdS::ksvc;
 
+TEST(CommandlineArgsTest, addShort_Unknown) {
+  // TEST ADDING A LONG ARGUMENT PAIR
+  CommandlineArgs obj;
+  ASSERT_EQ(-1, obj.parseShort(";", std::array<const char *, 1>{"test"}));
+  ASSERT_EQ(0, obj.configFiles().size());
+}
+
+TEST(CommandlineArgsTest, addLong_Unknown) {
+  // TEST ADDING A LONG ARGUMENT PAIR
+  CommandlineArgs obj;
+  ASSERT_EQ(-1, obj.parseLong("bla", std::array<const char *, 1>{"test"}));
+  ASSERT_EQ(0, obj.configFiles().size());
+}
+
 TEST(CommandlineArgsTest, addShort) {
   // TEST ADDING A LONG ARGUMENT PAIR
   CommandlineArgs obj;
-  obj.parseShort("c", "test");
+  ASSERT_EQ(1, obj.parseShort("c", std::array<const char *, 1>{"test"}));
   ASSERT_EQ(1, obj.configFiles().size());
   ASSERT_EQ("test", obj.configFiles().front());
 }
@@ -17,7 +31,7 @@ TEST(CommandlineArgsTest, addShort) {
 TEST(CommandlineArgsTest, addLong) {
   // TEST ADDING A LONG ARGUMENT PAIR
   CommandlineArgs obj;
-  obj.parseLong("config", "test");
+  ASSERT_EQ(1, obj.parseLong("config", std::array<const char *, 1>{"test"}));
   ASSERT_EQ(1, obj.configFiles().size());
   ASSERT_EQ("test", obj.configFiles().front());
 }

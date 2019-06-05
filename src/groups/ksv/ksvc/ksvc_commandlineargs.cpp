@@ -18,22 +18,27 @@ namespace {
  
   struct ArgInfo {
     // TYPES
-    typedef std::function<void(CommandlineArgs::Data *data,
-                               const std::string &name,
-                               const std::string &value)>
-        Setter;
+    typedef std::function<int(CommandlineArgs::Data *data,
+                              const std::string &name,
+                              gsl::span<const char * const> arguments)>
+        Parser;
 
     // DATA
     const std::string d_longName;
     const std::string d_shortName;
     const std::string d_description;
-    Setter d_setter;
+    Parser d_parser;
   };
 
-#define _(x, y, z) (CommandlineArgs::Data *x, const std::string &y, const std::string &z)
-  
-  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(data, name, value) {
-                                      data->d_configFiles.emplace_back(value);
+#define _(x, y, z)                                                             \
+  (CommandlineArgs::Data * x, const std::string &y, gsl::span<const char * const> z)->int
+
+  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(data, name, args) {
+                                      if (args.empty()) {
+                                        return -1;
+                                      }
+                                      data->d_configFiles.emplace_back(args[0]);
+                                      return 1;
                                     }}};
 
 #undef _
@@ -73,28 +78,29 @@ CommandlineArgs::CommandlineArgs()
 CommandlineArgs::~CommandlineArgs() {}
 
 // MANIPULATORS
-bool CommandlineArgs::parseLong(const std::string &name,
-                                const std::string &value) {
+int CommandlineArgs::parseLong(const std::string &name, gsl::span<const char * const> arguments) {
   const auto argIter = findArgLong(name);
 
   if (std::end(s_argList) == argIter) {
-    return false;
+    return -1;
   }
 
-  argIter->d_setter(d_data.get(), name, value);
-  return true;
+  return argIter->d_parser(d_data.get(), name, arguments);
 }
 
-bool CommandlineArgs::parseShort(const std::string &name,
-                                 const std::string &value) {
+int CommandlineArgs::parseShort(const std::string &name, gsl::span<const char * const> arguments) {
   const auto argIter = findArgShort(name);
 
   if (std::end(s_argList) == argIter) {
-    return false;
+    return -1;
   }
 
-  argIter->d_setter(d_data.get(), name, value);
-  return true;
+  return argIter->d_parser(d_data.get(), name, arguments);
+}
+
+void CommandlineArgs::appendPositional(const std::string &value)
+{
+  d_data->d_positional.emplace_back(value);
 }
 
 // ACCESSORS
@@ -110,7 +116,30 @@ const CommandlineArgs::Strings &CommandlineArgs::configFiles() const {
 // Class: CommandlineArgsUtil
 // --------------------------
 
-CommandlineArgs CommandlineArgsUtil::create(int argc, char **argv) {}
+CommandlineArgs CommandlineArgsUtil::create(int argc, char **argv)
+{
+  CommandlineArgs result;
+
+  for (char **arg = argv; nullptr != *argv; ++arg) {
+
+    // char *argName = arg[0];
+    // char *argValue = arg[1];
+
+    // if ('-' == argName[0]) {
+
+    //   if ('-' == argName[1]) {
+
+    // 	if (!result.parseLong(arg + 2)) {
+    // 	  result.appendPositional(*arg);
+    // 	}
+	
+    //   }
+
+    // }
+
+  }
+
+}
 
 } // namespace ksvc
 } // namespace MvdS

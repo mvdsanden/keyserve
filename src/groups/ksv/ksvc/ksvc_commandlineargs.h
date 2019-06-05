@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+#include <gsl/span>
+
 namespace MvdS {
 namespace ksvc {
 
@@ -36,13 +38,19 @@ public:
   virtual ~CommandlineArgs();
   
   // MANIPULATORS
-  bool parseLong(const std::string& name, const std::string& value);
-  // Parse a long argument with the specified 'name' and the specified 'value'.
-  // Return 'true' on success, false otherwise.
+  int parseLong(const std::string &name, gsl::span<const char * const> arguments);
+  // Parse a long argument with the specified 'name' and the specified
+  // 'argc' count arguments in the specified 'argv'. Return '-1' on failure
+  // and the number of parsed arguments otherwise.
 
-  bool parseShort(const std::string& name, const std::string& value);
-  // Parse a short argument with the specified 'name' and the specified 'value'.
-  // Return 'true' on success, false otherwise.
+  int parseShort(const std::string &name, gsl::span<const char * const> arguments);
+  // Parse a long argument with the specified 'name' and the specified
+  // 'argc' count arguments in the specified 'argv'. Return '-1' on failure
+  // and the number of parsed arguments otherwise.
+
+
+  void appendPositional(const std::string& value);
+  // Append the specified 'value' to the positional arguments list.
   
   // ACCESSORS
   const Strings& positional() const;

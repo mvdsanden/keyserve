@@ -197,3 +197,7 @@ function(mvds_build)
   endforeach(pkgtype)
 
 endfunction(mvds_build)
+
+function(mvds_thirdparty_include_dir dir)
+  include_directories("${dir}")
+endfunction(mvds_thirdparty_include_dir)
