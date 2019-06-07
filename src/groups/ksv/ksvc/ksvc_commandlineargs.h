@@ -38,19 +38,11 @@ public:
   virtual ~CommandlineArgs();
   
   // MANIPULATORS
-  int parseLong(const std::string &name, gsl::span<const char * const> arguments);
-  // Parse a long argument with the specified 'name' and the specified
-  // 'argc' count arguments in the specified 'argv'. Return '-1' on failure
-  // and the number of parsed arguments otherwise.
-
-  int parseShort(const std::string &name, gsl::span<const char * const> arguments);
-  // Parse a long argument with the specified 'name' and the specified
-  // 'argc' count arguments in the specified 'argv'. Return '-1' on failure
-  // and the number of parsed arguments otherwise.
-
-
   void appendPositional(const std::string& value);
   // Append the specified 'value' to the positional arguments list.
+
+  void appendConfigFile(const std::string& filename);
+  // Append the specified 'filename' to the list of configuration files.
   
   // ACCESSORS
   const Strings& positional() const;
@@ -66,7 +58,7 @@ public:
 
 class CommandlineArgsUtil {
 public:
-  static CommandlineArgs create(int argc, char **argv);
+  static CommandlineArgs parse(int argc, char **argv);
   // Parse the specified 'argc' arguments from the specified 'argv'.
 };
 

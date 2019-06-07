@@ -18,7 +18,7 @@ namespace {
  
   struct ArgInfo {
     // TYPES
-    typedef std::function<int(CommandlineArgs::Data *data,
+    typedef std::function<int(CommandlineArgs *obj,
                               const std::string &name,
                               gsl::span<const char * const> arguments)>
         Parser;
@@ -31,13 +31,13 @@ namespace {
   };
 
 #define _(x, y, z)                                                             \
-  (CommandlineArgs::Data * x, const std::string &y, gsl::span<const char * const> z)->int
+  (CommandlineArgs * x, const std::string &y, gsl::span<const char * const> z)->int
 
-  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(data, name, args) {
+  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(obj, name, args) {
                                       if (args.empty()) {
                                         return -1;
                                       }
-                                      data->d_configFiles.emplace_back(args[0]);
+                                      obj->appendConfigFile(args[0]);
                                       return 1;
                                     }}};
 
@@ -62,7 +62,28 @@ namespace {
                    [name](const auto &arg) { return name == arg.d_shortName; });
   }
 
-  
+  int parseLong(CommandlineArgs *obj, const std::string &name,
+                gsl::span<const char *const> arguments) {
+    const auto argIter = findArgLong(name);
+
+    if (std::end(s_argList) == argIter) {
+      return -1;
+    }
+
+    return argIter->d_parser(obj, name, arguments);
+  }
+
+  int parseShort(CommandlineArgs *obj, const std::string &name,
+                 gsl::span<const char *const> arguments) {
+    const auto argIter = findArgShort(name);
+
+    if (std::end(s_argList) == argIter) {
+      return -1;
+    }
+
+    return argIter->d_parser(obj, name, arguments);
+  }
+
 } // anonymouse namespace
 
 // ----------------------
@@ -78,31 +99,16 @@ CommandlineArgs::CommandlineArgs()
 CommandlineArgs::~CommandlineArgs() {}
 
 // MANIPULATORS
-int CommandlineArgs::parseLong(const std::string &name, gsl::span<const char * const> arguments) {
-  const auto argIter = findArgLong(name);
-
-  if (std::end(s_argList) == argIter) {
-    return -1;
-  }
-
-  return argIter->d_parser(d_data.get(), name, arguments);
-}
-
-int CommandlineArgs::parseShort(const std::string &name, gsl::span<const char * const> arguments) {
-  const auto argIter = findArgShort(name);
-
-  if (std::end(s_argList) == argIter) {
-    return -1;
-  }
-
-  return argIter->d_parser(d_data.get(), name, arguments);
-}
-
 void CommandlineArgs::appendPositional(const std::string &value)
 {
   d_data->d_positional.emplace_back(value);
 }
 
+void CommandlineArgs::appendConfigFile(const std::string& filename)
+{
+  d_data->d_configFiles.emplace_back(filename);
+}
+  
 // ACCESSORS
 const CommandlineArgs::Strings &CommandlineArgs::positional() const {
   return d_data->d_positional;
@@ -116,27 +122,35 @@ const CommandlineArgs::Strings &CommandlineArgs::configFiles() const {
 // Class: CommandlineArgsUtil
 // --------------------------
 
-CommandlineArgs CommandlineArgsUtil::create(int argc, char **argv)
+CommandlineArgs CommandlineArgsUtil::parse(int argc, char **argv)
 {
+  typedef gsl::span<const char *const> ArgSpan;
   CommandlineArgs result;
+  ArgSpan args(const_cast<const char **>(argv), argc);
 
-  for (char **arg = argv; nullptr != *argv; ++arg) {
+  for (size_t i = 0; i < argc; ++i) {
 
-    // char *argName = arg[0];
-    // char *argValue = arg[1];
+    const char *name = args[i];
 
-    // if ('-' == argName[0]) {
+    if ('-' == name[0]) {
 
-    //   if ('-' == argName[1]) {
+      if ('-' == name[1]) {
 
-    // 	if (!result.parseLong(arg + 2)) {
-    // 	  result.appendPositional(*arg);
-    // 	}
+    	if (parseLong(&result, name, args.subspan(i+1))) {
+	  continue;
+    	}
 	
-    //   }
+      } else {
 
-    // }
+    	if (parseShort(&result, name, args.subspan(i+1))) {
+	  continue;
+    	}
+	
+      }
 
+    }
+
+    result.appendPositional(name);
   }
 
 }
