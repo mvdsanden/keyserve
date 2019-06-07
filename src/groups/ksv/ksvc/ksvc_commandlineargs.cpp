@@ -6,16 +6,8 @@
 namespace MvdS {
 namespace ksvc {
 
-struct CommandlineArgs::Data
-{
-  // DATA
-  Strings d_positional;
-  Strings d_configFiles;
-};
-
 namespace {
 
- 
   struct ArgInfo {
     // TYPES
     typedef std::function<int(CommandlineArgs *obj,
@@ -33,13 +25,16 @@ namespace {
 #define _(x, y, z)                                                             \
   (CommandlineArgs * x, const std::string &y, gsl::span<const char * const> z)->int
 
-  std::array<ArgInfo, 1> s_argList{{"config", "c", "", [] _(obj, name, args) {
-                                      if (args.empty()) {
-                                        return -1;
-                                      }
-                                      obj->appendConfigFile(args[0]);
-                                      return 1;
-                                    }}};
+  std::array<ArgInfo, 2> s_argList{
+      {"config", "c", "",
+       [] _(obj, name, args) {
+         if (args.empty()) {
+           return -1;
+         }
+         obj->configFiles().emplace_back(args[0]);
+         return 1;
+	}}/*,
+	    {"help", "h", "", [] _(obj, name, args) { return 0; }}*/};
 
 #undef _
 
@@ -92,43 +87,41 @@ namespace {
 
 // CREATORS
 CommandlineArgs::CommandlineArgs()
-  : d_data(new Data)
 {
 }
 
 CommandlineArgs::~CommandlineArgs() {}
 
 // MANIPULATORS
-void CommandlineArgs::appendPositional(const std::string &value)
-{
-  d_data->d_positional.emplace_back(value);
-}
-
-void CommandlineArgs::appendConfigFile(const std::string& filename)
-{
-  d_data->d_configFiles.emplace_back(filename);
-}
   
 // ACCESSORS
 const CommandlineArgs::Strings &CommandlineArgs::positional() const {
-  return d_data->d_positional;
+  return d_positional;
 }
 
+CommandlineArgs::Strings &CommandlineArgs::positional() {
+  return d_positional;
+}
+  
 const CommandlineArgs::Strings &CommandlineArgs::configFiles() const {
-  return d_data->d_configFiles;
+  return d_configFiles;
 }
 
+CommandlineArgs::Strings &CommandlineArgs::configFiles()  {
+  return d_configFiles;
+}
+  
 // --------------------------
 // Class: CommandlineArgsUtil
 // --------------------------
 
-CommandlineArgs CommandlineArgsUtil::parse(int argc, char **argv)
+CommandlineArgs CommandlineArgsUtil::parse(gsl::span<const char * const> args)
 {
   typedef gsl::span<const char *const> ArgSpan;
   CommandlineArgs result;
-  ArgSpan args(const_cast<const char **>(argv), argc);
+  //  ArgSpan args(const_cast<const char **>(argv), argc);
 
-  for (size_t i = 0; i < argc; ++i) {
+  for (size_t i = 0; i < args.size(); ++i) {
 
     const char *name = args[i];
 
@@ -136,13 +129,13 @@ CommandlineArgs CommandlineArgsUtil::parse(int argc, char **argv)
 
       if ('-' == name[1]) {
 
-    	if (parseLong(&result, name, args.subspan(i+1))) {
+    	if (parseLong(&result, name + 2, args.subspan(i+1))) {
 	  continue;
     	}
 	
       } else {
 
-    	if (parseShort(&result, name, args.subspan(i+1))) {
+    	if (parseShort(&result, name + 1, args.subspan(i+1))) {
 	  continue;
     	}
 	
@@ -150,7 +143,7 @@ CommandlineArgs CommandlineArgsUtil::parse(int argc, char **argv)
 
     }
 
-    result.appendPositional(name);
+    result.positional().emplace_back(name);
   }
 
 }

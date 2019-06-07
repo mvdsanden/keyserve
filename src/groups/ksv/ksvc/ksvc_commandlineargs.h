@@ -27,7 +27,8 @@ public:
 private:  
 
   // DATA
-  std::unique_ptr<Data> d_data;
+  Strings d_positional;
+  Strings d_configFiles;
   
   // PRIVATE MANIPULATORS
 
@@ -38,17 +39,18 @@ public:
   virtual ~CommandlineArgs();
   
   // MANIPULATORS
-  void appendPositional(const std::string& value);
-  // Append the specified 'value' to the positional arguments list.
 
-  void appendConfigFile(const std::string& filename);
-  // Append the specified 'filename' to the list of configuration files.
-  
   // ACCESSORS
   const Strings& positional() const;
   // Return positional arguments.
 
+  Strings& positional();
+  // Return positional arguments.
+  
   const Strings& configFiles() const;
+  // Return all specified configuration files.
+
+  Strings& configFiles();
   // Return all specified configuration files.
 };
 
@@ -58,7 +60,7 @@ public:
 
 class CommandlineArgsUtil {
 public:
-  static CommandlineArgs parse(int argc, char **argv);
+  static CommandlineArgs parse(gsl::span<const char * const> arguments);
   // Parse the specified 'argc' arguments from the specified 'argv'.
 };
 
