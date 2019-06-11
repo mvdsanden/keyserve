@@ -2,6 +2,7 @@
 #include <ksvc_commandlineargs.h>
 
 #include <functional>
+#include <iostream>
 
 namespace MvdS {
 namespace ksvc {
@@ -11,7 +12,6 @@ namespace {
   struct ArgInfo {
     // TYPES
     typedef std::function<int(CommandlineArgs *obj,
-                              const std::string &name,
                               gsl::span<const char * const> arguments)>
         Parser;
 
@@ -22,17 +22,16 @@ namespace {
     Parser d_parser;
   };
 
-#define _(x, y, z)                                                             \
-  (CommandlineArgs * x, const std::string &y, gsl::span<const char * const> z)->int
+#define _(x, y) (CommandlineArgs * x, gsl::span<const char *const> y)->int
 
   std::array<ArgInfo, 2> s_argList{
-      {"config", "c", "",
-       [] _(obj, name, args) {
-         if (args.empty()) {
-           return -1;
-         }
-         obj->configFiles().emplace_back(args[0]);
-         return 1;
+      {"--config", "-c", "",
+       [] _(obj, args) {
+          if (2 > args.size()) {
+            return 0;
+          }
+          obj->configFiles().emplace_back(args[1]);
+          return 2;
 	}}/*,
 	    {"help", "h", "", [] _(obj, name, args) { return 0; }}*/};
 
@@ -40,43 +39,26 @@ namespace {
 
   typedef decltype(s_argList)::const_iterator ArgIterator;
   
-  ArgIterator findArg(const std::string &name,
-                         std::function<bool(const ArgInfo &arg)> cmp) {
-    return std::find_if(std::begin(s_argList), std::end(s_argList), cmp);
+  ArgIterator findArgument(const std::string &name) {
+    return std::find_if(
+        std::begin(s_argList), std::end(s_argList), [name](const auto &arg) {
+          return arg.d_shortName == name || arg.d_longName == name;
+        });
   }
 
-  ArgIterator findArgLong(const std::string& name)
-  {
-    return findArg(name,
-                   [name](const auto &arg) { return name == arg.d_longName; });
-  }
-
-  ArgIterator findArgShort(const std::string& name)
-  {
-    return findArg(name,
-                   [name](const auto &arg) { return name == arg.d_shortName; });
-  }
-
-  int parseLong(CommandlineArgs *obj, const std::string &name,
-                gsl::span<const char *const> arguments) {
-    const auto argIter = findArgLong(name);
-
-    if (std::end(s_argList) == argIter) {
-      return -1;
+  int parseArgument(CommandlineArgs *obj,
+                    gsl::span<const char *const> arguments) {    
+    if (arguments.empty()) {
+      return 0;
     }
 
-    return argIter->d_parser(obj, name, arguments);
-  }
-
-  int parseShort(CommandlineArgs *obj, const std::string &name,
-                 gsl::span<const char *const> arguments) {
-    const auto argIter = findArgShort(name);
+    const auto argIter = findArgument(arguments[0]);
 
     if (std::end(s_argList) == argIter) {
-      return -1;
+      return 0;
     }
 
-    return argIter->d_parser(obj, name, arguments);
+    return argIter->d_parser(obj, arguments);
   }
 
 } // anonymouse namespace
@@ -119,33 +101,20 @@ CommandlineArgs CommandlineArgsUtil::parse(gsl::span<const char * const> args)
 {
   typedef gsl::span<const char *const> ArgSpan;
   CommandlineArgs result;
-  //  ArgSpan args(const_cast<const char **>(argv), argc);
 
-  for (size_t i = 0; i < args.size(); ++i) {
+  size_t index = 0;
+  while (index < args.size()) {
+    size_t shift = parseArgument(&result, args.subspan(index));
 
-    const char *name = args[i];
-
-    if ('-' == name[0]) {
-
-      if ('-' == name[1]) {
-
-    	if (parseLong(&result, name + 2, args.subspan(i+1))) {
-	  continue;
-    	}
-	
-      } else {
-
-    	if (parseShort(&result, name + 1, args.subspan(i+1))) {
-	  continue;
-    	}
-	
-      }
-
+    if (0 == shift) {
+      result.positional().emplace_back(args[index]);
+      ++shift;
     }
 
-    result.positional().emplace_back(name);
+    index += shift;
   }
 
+  return result;
 }
 
 } // namespace ksvc
