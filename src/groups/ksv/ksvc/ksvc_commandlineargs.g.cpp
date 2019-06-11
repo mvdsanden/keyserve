@@ -6,6 +6,16 @@
 using namespace MvdS;
 using namespace MvdS::ksvc;
 
+namespace {
+
+  template <typename... Args>
+  const std::array<const char *, sizeof...(Args)> to_args(Args... args)
+  {
+    return {args...};
+  }
+
+} // anonymouse namespace
+
 /*
 TEST(CommandlineArgsTest, addShort_Unknown) {
   // TEST ADDING A LONG ARGUMENT PAIR
@@ -32,12 +42,12 @@ TEST(CommandlineArgsTest, addShort) {
 
 TEST(CommandlineArgsTest, parseConfigLong) {
   // TEST ADDING A LONG ARGUMENT PAIR
-  std::vector<const char *> args;
-  args.push_back("--config");
-  args.push_back("test");
+  // std::vector<const char *> args;
+  // args.push_back("--config");
+  // args.push_back("test");
 
-  CommandlineArgs obj = CommandlineArgsUtil::parse(args); 
-  // ASSERT_EQ(1, obj.parseLong("config", std::array<const char *, 1>{"test"}));
+  //  CommandlineArgs obj = CommandlineArgsUtil::parse(args);
+  CommandlineArgs obj = CommandlineArgsUtil::parse(to_args("--config", "test")); 
   ASSERT_EQ(1, obj.configFiles().size());
   ASSERT_EQ("test", obj.configFiles().front());
 }

@@ -9,53 +9,72 @@ namespace ksvc {
 
 namespace {
 
-  struct ArgInfo {
+  class ArgumentTable {
+
     // TYPES
-    typedef std::function<size_t(CommandlineArgs *obj,
-                              gsl::span<const char * const> arguments)>
-        Parser;
+    struct Argument {
+      // TYPES
+      typedef std::function<size_t(CommandlineArgs *obj,
+				   gsl::span<const char * const> arguments)>
+      Parser;
 
+      // DATA
+      const std::string d_longName;
+      const std::string d_shortName;
+      const std::string d_description;
+      Parser d_parser;
+
+      // CREATORS
+      Argument(const std::string &longName, const std::string &shortName,
+              const std::string &description, const Parser parser)
+          : d_longName(longName), d_shortName(shortName),
+            d_description(description), d_parser(parser) {}
+    };
+
+    typedef std::vector<Argument> Arguments;
+    typedef Arguments::const_iterator const_iterator;
+    
     // DATA
-    const std::string d_longName;
-    const std::string d_shortName;
-    const std::string d_description;
-    Parser d_parser;
+    Arguments d_arguments;
+
+    // PRIVATE ACCESSORS
+    const_iterator findArgument(const std::string &name) const {
+      return std::find_if(std::begin(d_arguments), std::end(d_arguments),
+                          [name](const auto &arg) {
+                            return arg.d_shortName == name ||
+                                   arg.d_longName == name;
+                          });
+    }
+
+  public:
+    // CREATORS
+    ArgumentTable() {
+      d_arguments.push_back(
+          Argument("--config", "-c", "", [](auto *obj, auto args) {
+            if (2 > args.size()) {
+              return 0;
+            }
+            obj->configFiles().emplace_back(args[1]);
+            return 2;
+          }));
+    }
+
+    // ACCESSORS
+    size_t parseArgument(CommandlineArgs *obj,
+                         gsl::span<const char *const> arguments) const {
+      if (arguments.empty()) {
+        return 0;
+      }
+
+      const auto argIter = findArgument(arguments[0]);
+
+      if (std::end(d_arguments) == argIter) {
+        return 0;
+      }
+
+      return argIter->d_parser(obj, arguments);
+    }
   };
-
-  std::array<ArgInfo, 2> s_argList{
-      {"--config", "-c", "",
-       [](auto *obj, auto args) {
-          if (2 > args.size()) {
-            return 0;
-          }
-          obj->configFiles().emplace_back(args[1]);
-          return 2;
-	}}/*,
-	    {"help", "h", "", [] _(obj, name, args) { return 0; }}*/};
-
-  typedef decltype(s_argList)::const_iterator ArgIterator;
-  
-  ArgIterator findArgument(const std::string &name) {
-    return std::find_if(
-        std::begin(s_argList), std::end(s_argList), [name](const auto &arg) {
-          return arg.d_shortName == name || arg.d_longName == name;
-        });
-  }
-
-  size_t parseArgument(CommandlineArgs *obj,
-                    gsl::span<const char *const> arguments) {    
-    if (arguments.empty()) {
-      return 0;
-    }
-
-    const auto argIter = findArgument(arguments[0]);
-
-    if (std::end(s_argList) == argIter) {
-      return 0;
-    }
-
-    return argIter->d_parser(obj, arguments);
-  }
 
 } // anonymouse namespace
 
@@ -95,12 +114,14 @@ CommandlineArgs::Strings &CommandlineArgs::configFiles()  {
 
 CommandlineArgs CommandlineArgsUtil::parse(gsl::span<const char * const> args)
 {
+  static ArgumentTable s_table;
+  
   typedef gsl::span<const char *const> ArgSpan;
   CommandlineArgs result;
 
   size_t index = 0;
   while (index < args.size()) {
-    size_t shift = parseArgument(&result, args.subspan(index));
+    size_t shift = s_table.parseArgument(&result, args.subspan(index));
 
     if (0 == shift) {
       result.positional().emplace_back(args[index]);
