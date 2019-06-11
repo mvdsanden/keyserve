@@ -11,7 +11,7 @@ namespace {
 
   struct ArgInfo {
     // TYPES
-    typedef std::function<int(CommandlineArgs *obj,
+    typedef std::function<size_t(CommandlineArgs *obj,
                               gsl::span<const char * const> arguments)>
         Parser;
 
@@ -22,11 +22,9 @@ namespace {
     Parser d_parser;
   };
 
-#define _(x, y) (CommandlineArgs * x, gsl::span<const char *const> y)->int
-
   std::array<ArgInfo, 2> s_argList{
       {"--config", "-c", "",
-       [] _(obj, args) {
+       [](auto *obj, auto args) {
           if (2 > args.size()) {
             return 0;
           }
@@ -34,8 +32,6 @@ namespace {
           return 2;
 	}}/*,
 	    {"help", "h", "", [] _(obj, name, args) { return 0; }}*/};
-
-#undef _
 
   typedef decltype(s_argList)::const_iterator ArgIterator;
   
@@ -46,7 +42,7 @@ namespace {
         });
   }
 
-  int parseArgument(CommandlineArgs *obj,
+  size_t parseArgument(CommandlineArgs *obj,
                     gsl::span<const char *const> arguments) {    
     if (arguments.empty()) {
       return 0;
