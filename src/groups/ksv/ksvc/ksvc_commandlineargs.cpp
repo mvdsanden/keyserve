@@ -9,35 +9,41 @@ namespace ksvc {
 
 namespace {
 
+// ---------------
+// Struct Argument
+// ---------------
+struct Argument
+{
+  // TYPES
+  typedef std::function<size_t(CommandlineArgs *            obj,
+                               gsl::span<const char *const> arguments)>
+      Parser;
+
+  // DATA
+  const std::string d_longName;
+  const std::string d_shortName;
+  Parser            d_parser;
+  const std::string d_description;
+
+  // CREATORS
+  Argument(const std::string &longName,
+           const std::string &shortName,
+           const Parser       parser,
+           const std::string &description)
+      : d_longName(longName)
+      , d_shortName(shortName)
+      , d_parser(parser)
+      , d_description(description)
+  {}
+};
+
+// -------------------
+// Class ArgumentTable
+// -------------------
 class ArgumentTable
 {
 
   // TYPES
-  struct Argument
-  {
-    // TYPES
-    typedef std::function<size_t(CommandlineArgs *            obj,
-                                 gsl::span<const char *const> arguments)>
-        Parser;
-
-    // DATA
-    const std::string d_longName;
-    const std::string d_shortName;
-    const std::string d_description;
-    Parser            d_parser;
-
-    // CREATORS
-    Argument(const std::string &longName,
-             const std::string &shortName,
-             const std::string &description,
-             const Parser       parser)
-        : d_longName(longName)
-        , d_shortName(shortName)
-        , d_description(description)
-        , d_parser(parser)
-    {}
-  };
-
   typedef std::vector<Argument>     Arguments;
   typedef Arguments::const_iterator const_iterator;
 
@@ -70,7 +76,8 @@ public:
   // CREATORS
   ArgumentTable()
   {
-    d_arguments.emplace_back("--config", "-c", "", parseConfig);
+    d_arguments.emplace_back(
+        "--config", "-c", parseConfig, "Configuration file to use.");
   }
 
   // ACCESSORS
