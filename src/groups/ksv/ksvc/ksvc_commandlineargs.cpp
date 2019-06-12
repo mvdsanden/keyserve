@@ -52,6 +52,8 @@ class ArgumentTable
 
   // PRIVATE ACCESSORS
   const_iterator findArgument(const std::string &name) const
+  // Find the argument with the specified 'name' in 'd_arguments'. Return an
+  // iterator to it or the end of iterator if not found.
   {
     return std::find_if(std::begin(d_arguments),
                         std::end(d_arguments),
@@ -69,7 +71,7 @@ class ArgumentTable
       return 0;
     }
     obj->configFiles().emplace_back(args[1]);
-    return 2;
+    return 2; // parsed two elements from 'args'.
   }
   
 public:
