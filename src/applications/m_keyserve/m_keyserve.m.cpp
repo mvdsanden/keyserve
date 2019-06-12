@@ -28,14 +28,16 @@ namespace {
 
 int main(int argc, char *argv[])
 {
-  ksvc::CommandlineArgs args;
-  // if (!ksvc::CommandlineArgsUtil::parse(&args, argc, argv)) {
-  //   ksvc::CommandLineArgumentsUtil::printUsage(argc, argv);
-  //   return 1;
-  // }
+  ksvc::CommandlineArgs arguments;
+  ksvc::CommandlineArgsUtil::parse(&arguments, {argv, argc});
+
+  if (arguments.printUsage()) {
+    ksvc::CommandlineArgsUtil::printUsage(&std::cout, {argv, argc});
+    return 1;
+  }
 
   // ksrv::Configuration config;
-  // if (!ksrv::ConfigurationUtil::readConfiguration(&config, args)) {
+  // if (!ksrv::ConfigurationUtil::readConfiguration(&config, arguments)) {
   //   return 2;
   // }
 
@@ -51,13 +53,23 @@ int main(int argc, char *argv[])
 
   // ksrv::CachingKeyStore cachingKeyStore(keyStore.get(), config);
 
+  // a_kscrypto::CryptoFactory cryptoFactory(config);
+  // std::unique_ptr<ksrv::Crypto> crypto = cryptoFactory.create();
+  // if (!crypto) {
+  //   return 5;
+  // }
+
+  // if (!crypto.start()) {
+  //   return 6;
+  // }
+  
   // a_ksvcs::ServiceFactory        serviceFactory(config);
   // ksrv::ServiceFactory::Services services =
   //     serviceFactory.createConfigured(&services, &cachingKeyStore);
 
   // if (!startAllServices(&services)) {
   //   LOG_ERR("No services started");
-  //   return 6;
+  //   return 7;
   // }
 
   return 0;

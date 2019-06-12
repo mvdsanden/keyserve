@@ -16,6 +16,7 @@ typedef std::function<size_t(CommandlineArgs *            obj,
 // ---------------
 // Struct Argument
 // ---------------
+  
 struct Argument
 {
   // TYPES
@@ -30,6 +31,7 @@ struct Argument
 // -------------------
 // Class ArgumentTable
 // -------------------
+
 class ArgumentTable
 {
 
@@ -63,14 +65,34 @@ class ArgumentTable
     obj->configFiles().emplace_back(args[1]);
     return 2; // parsed two elements from 'args'.
   }
+
+  static size_t parseHelp(CommandlineArgs *            obj,
+                          gsl::span<const char *const> args)
+  {
+    if (1 > args.size()) {
+      return 0;
+    }
+    obj->printUsage(true);
+    return 1; // parsed one element from 'args'.
+  }
+
   
 public:
   // CREATORS
   ArgumentTable()
   {
     append("--config", "-c", parseConfig, "Configuration file to use.");
+    append("--help", "-h", parseHelp, "Print usage information");
   }
 
+  // CLASS METHODS
+  static ArgumentTable *singleton()
+  // Return singleton object.
+  {
+    static ArgumentTable s_instance;
+    return &s_instance;
+  }
+  
   // MANIPULATORS
   bool append(const std::string &shortName,
               const std::string &longName,
@@ -103,6 +125,19 @@ public:
 
     return i->d_parser(obj, arguments);
   }
+
+  void printUsage(std::ostream *stream, gsl::span<const char *const> arguments)
+  {
+    if (!arguments.empty()) {
+      *stream << arguments[0];
+    }
+
+    for (const Argument& arg : d_arguments) {
+      *stream << " [" << arg.d_shortName << "|" << arg.d_longName << "]";
+    }
+
+    *stream << "\n";
+  }
 };
 
 } // namespace
@@ -117,6 +152,10 @@ CommandlineArgs::CommandlineArgs() {}
 CommandlineArgs::~CommandlineArgs() {}
 
 // MANIPULATORS
+void CommandlineArgs::printUsage(bool on)
+{
+  d_printUsage = on;
+}
 
 // ACCESSORS
 const CommandlineArgs::Strings &CommandlineArgs::positional() const
@@ -136,31 +175,41 @@ CommandlineArgs::Strings &CommandlineArgs::configFiles()
   return d_configFiles;
 }
 
+bool CommandlineArgs::printUsage() const
+{
+  return d_printUsage;
+}
+  
 // --------------------------
 // Class: CommandlineArgsUtil
 // --------------------------
 
-CommandlineArgs CommandlineArgsUtil::parse(gsl::span<const char *const> args)
+void CommandlineArgsUtil::parse(CommandlineArgs *            result,
+                                gsl::span<const char *const> args)
 {
-  static ArgumentTable                 s_table;
   typedef gsl::span<const char *const> ArgSpan;
-  CommandlineArgs                      result;
 
+  ArgumentTable *table = ArgumentTable::singleton();
+  
   size_t index = 0;
   while (index < args.size()) {
-    size_t shift = s_table.parseArgument(&result, args.subspan(index));
+    size_t shift = table->parseArgument(result, args.subspan(index));
 
     if (0 == shift) {
-      result.positional().emplace_back(args[index]);
+      result->positional().emplace_back(args[index]);
       ++shift;
     }
 
     index += shift;
   }
-
-  return result;
 }
 
+void CommandlineArgsUtil::printUsage(std::ostream *               stream,
+                                     gsl::span<const char *const> arguments)
+{
+  ArgumentTable::singleton()->printUsage(stream, arguments);
+}
+  
 } // namespace ksvc
 } // namespace MvdS
 
