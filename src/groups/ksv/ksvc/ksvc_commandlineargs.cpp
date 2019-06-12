@@ -55,18 +55,22 @@ class ArgumentTable
                         });
   }
 
+  // PRIVATE CLASS METHODS
+  static size_t parseConfig(CommandlineArgs *            obj,
+                            gsl::span<const char *const> args)
+  {
+    if (2 > args.size()) {
+      return 0;
+    }
+    obj->configFiles().emplace_back(args[1]);
+    return 2;
+  }
+  
 public:
   // CREATORS
   ArgumentTable()
   {
-    d_arguments.push_back(
-        Argument("--config", "-c", "", [](auto *obj, auto args) {
-          if (2 > args.size()) {
-            return 0;
-          }
-          obj->configFiles().emplace_back(args[1]);
-          return 2;
-        }));
+    d_arguments.emplace_back("--config", "-c", "", parseConfig);
   }
 
   // ACCESSORS
