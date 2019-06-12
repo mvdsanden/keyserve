@@ -9,32 +9,22 @@ namespace ksvc {
 
 namespace {
 
+typedef std::function<size_t(CommandlineArgs *            obj,
+                             gsl::span<const char *const> arguments)>
+    ArgumentParser;
+
 // ---------------
 // Struct Argument
 // ---------------
 struct Argument
 {
   // TYPES
-  typedef std::function<size_t(CommandlineArgs *            obj,
-                               gsl::span<const char *const> arguments)>
-      Parser;
 
   // DATA
   const std::string d_longName;
   const std::string d_shortName;
-  Parser            d_parser;
+  ArgumentParser    d_parser;
   const std::string d_description;
-
-  // CREATORS
-  Argument(const std::string &longName,
-           const std::string &shortName,
-           const Parser       parser,
-           const std::string &description)
-      : d_longName(longName)
-      , d_shortName(shortName)
-      , d_parser(parser)
-      , d_description(description)
-  {}
 };
 
 // -------------------
@@ -78,25 +68,40 @@ public:
   // CREATORS
   ArgumentTable()
   {
-    d_arguments.emplace_back(
-        "--config", "-c", parseConfig, "Configuration file to use.");
+    append("--config", "-c", parseConfig, "Configuration file to use.");
   }
 
+  // MANIPULATORS
+  bool append(const std::string &shortName,
+              const std::string &longName,
+              ArgumentParser     parser,
+              const std::string &description)
+  // Append an argument parser for the specified 'longName' and the specified
+  // 'shortName'. Uses the specified 'parser' to process the commandline
+  // argument and uses the specified 'description' to generate usage
+  // information.
+  {
+    d_arguments.emplace_back(
+        (Argument){shortName, longName, parser, description});
+  }
+  
   // ACCESSORS
   size_t parseArgument(CommandlineArgs *            obj,
                        gsl::span<const char *const> arguments) const
+  // Parse the specified 'arguments'. If a matching argument parser is found it
+  // is called with the specified 'obj'. Return the number of 'arguments'
+  // parsed.
   {
     if (arguments.empty()) {
       return 0;
     }
 
-    const auto argIter = findArgument(arguments[0]);
-
-    if (std::end(d_arguments) == argIter) {
+    const auto i = findArgument(arguments[0]);
+    if (std::end(d_arguments) == i) {
       return 0;
     }
 
-    return argIter->d_parser(obj, arguments);
+    return i->d_parser(obj, arguments);
   }
 };
 
@@ -137,8 +142,7 @@ CommandlineArgs::Strings &CommandlineArgs::configFiles()
 
 CommandlineArgs CommandlineArgsUtil::parse(gsl::span<const char *const> args)
 {
-  static ArgumentTable s_table;
-
+  static ArgumentTable                 s_table;
   typedef gsl::span<const char *const> ArgSpan;
   CommandlineArgs                      result;
 
