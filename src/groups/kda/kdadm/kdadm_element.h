@@ -2,6 +2,7 @@
 #ifndef INCLUDED_KDADM_ELEMENT
 #define INCLUDED_KDADM_ELEMENT
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -20,7 +21,7 @@ class Element
 
 public:
   // PUBLIC TYPES
-  typedef std::vector<Element> Children;
+  typedef std::vector<std::shared_ptr<Element>> Children;
 
 private:
   
@@ -73,8 +74,7 @@ public:
   const Children& children() const;
   // Return all children.
 
-  void getElementsByTagName(std::vector<Element *> *elements,
-                            const std::string &     tag);
+  void getElementsByTagName(Children *elements, const std::string &tag);
   // Finds all children with the specified 'tag' and adds those to the specified
   // 'elements'.
 };
@@ -120,13 +120,14 @@ inline T Element::as() const
 
 inline const Element::Children &Element::children() const { return d_children; }
 
-inline void Element::getElementsByTagName(std::vector<Element *> *elements,
-                                          const std::string &     tag)
+inline void Element::getElementsByTagName(Children *         elements,
+                                          const std::string &tag)
 {
-  std::copy_if(std::begin(d_children),
-               std::end(d_children),
-               std::back_inserter(*elements),
-               [tag](auto e) { return e.isElementType() && tag == e.tag(); });
+  std::copy_if(
+      std::begin(d_children),
+      std::end(d_children),
+      std::back_inserter(*elements),
+      [tag](const auto &e) { return e->isElementType() && tag == e->tag(); });
 }
 
 } // namespace kdadm
