@@ -105,6 +105,7 @@ public:
   {
     d_arguments.emplace_back(
         (Argument){shortName, longName, parser, description});
+    return true;
   }
   
   // ACCESSORS
