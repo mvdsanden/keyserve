@@ -30,7 +30,6 @@ public:
   typedef std::vector<std::shared_ptr<Element>> Elements;
   typedef std::pair<std::string, std::string>   Attribute;
   typedef std::vector<Attribute>                Attributes;
-  typedef gsl::span<Attribute>                  AttributeSpan;
 
 private:
   
@@ -53,10 +52,15 @@ private:
 public:
   // CREATORS
   static std::unique_ptr<Element>
-  createElement(const std::string &tag, const AttributeSpan &attributes = AttributeSpan());
+  createElement(const std::string &tag);
+  // Return a newly created element type element with the specified 'tag'.
+
+  template <class Iter>
+  static std::unique_ptr<Element>
+  createElement(const std::string &tag, Iter beginAttributes, Iter endAttributes);
   // Return a newly created element type element with the specified 'tag' and
-  // optionally the specified 'attributes'.
-  // TODO: make second createElement and use iterators instead of span for attributes!
+  // set the attributes from the range of the specified 'beginAttributes' and
+  // 'endAttributes'.
 
   static std::unique_ptr<Element> createValue(const std::string& value);
   // Return a newly created value type element with the specified 'value'.
@@ -100,12 +104,34 @@ public:
   // true'.
 
   template <class OutputIt>
-  void getElementsByTagName(OutputIt outputIt, const std::string &tag);
+  void getElementsByTagName(OutputIt outputIt, const std::string &tag) const;
   // Finds all children with the specified 'tag' output those using the
   // specified 'outputIterator'.
 };
 
-  // --- INLINE METHODS ---
+// ===================
+// Struct ElementUtils
+// ===================
+
+struct ElementUtils
+{
+  // TYPES
+  typedef Element::Elements   Elements;
+  typedef Element::Attributes Attributes;
+
+  // CLASS METHODS
+  template <class Iter>
+  static Iter getElementByTagName(const std::string &tag, Iter begin, Iter end);
+  // Find the first element with the specified 'tag' in the specified 'begin'
+  // and the specified 'end' range.
+
+  template <class Iter>
+  static Iter getAttributeByName(const std::string &name, Iter begin, Iter end);
+  // Find the first attribute with the specified 'name' in the specified 'begin'
+  // and the specified 'end' range.  
+};
+
+// --- INLINE METHODS ---
 
 // --------------
 // Class: Element
@@ -113,12 +139,21 @@ public:
 
 // CREATORS
 inline std::unique_ptr<Element>
-Element::createElement(const std::string &tag, const AttributeSpan &attributes)
+Element::createElement(const std::string &tag)
 {
   std::unique_ptr<Element> element(new Element);
   element->setTag(tag);
-  element->attributes().insert(element->attributes().end(), std::begin(attributes), std::end(attributes));
   return std::move(element);
+}
+
+template <class Iter>
+inline std::unique_ptr<Element>
+Element::createElement(const std::string &tag, Iter beginAttributes, Iter endAttributes)
+{
+  std::unique_ptr<Element> element(new Element);
+  element->setTag(tag);
+  element->attributes().insert(element->attributes().end(), beginAttributes, endAttributes);
+  return std::move(element);  
 }
 
 inline std::unique_ptr<Element> Element::createValue(const std::string &value)
@@ -173,7 +208,7 @@ inline const Element::Attributes &Element::attributes() const
 
 template <class OutputIt>
 inline void Element::getElementsByTagName(OutputIt           outputIt,
-                                          const std::string &tag)
+                                          const std::string &tag) const
 {
   std::copy_if(
       std::begin(d_children),
@@ -182,6 +217,27 @@ inline void Element::getElementsByTagName(OutputIt           outputIt,
       [tag](const auto &e) { return e->isElementType() && tag == e->tag(); });
 }
 
+// -------------------
+// Struct ElementUtils
+// -------------------
+
+// CLASS METHODS
+template <class Iter>
+inline Iter ElementUtils::getElementByTagName(const std::string &tag, Iter begin, Iter end)
+{
+  return std::find_if(begin, end, [tag](const auto &e) {
+    return e->isElementType() && tag == e->tag();
+  });
+}
+
+template <class Iter>
+inline Iter ElementUtils::getAttributeByName(const std::string &name, Iter begin, Iter end)
+{
+  return std::find_if(
+      begin, end, [name](const auto &e) { return e.first == name; });
+}
+
+  
 } // namespace kdadm
 } // namespace MvdS
 
