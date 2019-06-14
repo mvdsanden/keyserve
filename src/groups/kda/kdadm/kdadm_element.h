@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <charconv>
 
 namespace MvdS {
 namespace kdadm {
@@ -21,7 +20,7 @@ class Element
 
 public:
   // PUBLIC TYPES
-  typedef std::vector<std::shared_ptr<Element>> Children;
+  typedef std::vector<std::shared_ptr<Element>> Elements;
 
 private:
   
@@ -36,13 +35,18 @@ private:
   // DATA
   Type        d_type = e_UndefinedType;
   std::string d_data;
-  Children    d_children;
+  Elements    d_children;
 
   // PRIVATE MANIPULATORS
 
 public:
   // CREATORS
+  static std::unique_ptr<Element> createElement(const std::string& tag);
+  // Return a newly created element type element with the specified 'tag'.
 
+  static std::unique_ptr<Element> createValue(const std::string& value);
+  // Return a newly created value type element with the specified 'value'.
+  
   // MANIPULATORS
   void setTag(const std::string& tag);
   // Set the tag name of the element. Behavior is undefined if 'setValue()' was
@@ -52,7 +56,7 @@ public:
   // Set the value of the element. Behavior is undefined if 'setTag()' was
   // called before this call.
 
-  Children& children();
+  Elements& children();
   // Return all children.
   
   // ACCESSORS
@@ -66,17 +70,17 @@ public:
   // Return the tag name of the element. Behavior is undefined unless
   // 'isValueType() == false'.
 
-  template <class T>
-  T as() const;
-  // Return the value of the element converted to the specified type 'T'.
-  // Behavior is undefined unless 'isValueType() == true'.
+  const std::string& value() const;
+  // Return the satring value of the elemen. Behavior is undefined unless
+  // 'isValueType() == true'.
 
-  const Children& children() const;
+  const Elements& children() const;
   // Return all children.
 
-  void getElementsByTagName(Children *elements, const std::string &tag);
-  // Finds all children with the specified 'tag' and adds those to the specified
-  // 'elements'.
+  template <class OutputIt>
+  void getElementsByTagName(OutputIt outputIt, const std::string &tag);
+  // Finds all children with the specified 'tag' output those using the
+  // specified 'outputIterator'.
 };
 
   // --- INLINE METHODS ---
@@ -84,6 +88,21 @@ public:
 // --------------
 // Class: Element
 // --------------
+
+// CREATORS
+inline std::unique_ptr<Element> Element::createElement(const std::string &tag)
+{
+  std::unique_ptr<Element> element(new Element);
+  element->setTag(tag);
+  return std::move(element);
+}
+
+inline std::unique_ptr<Element> Element::createValue(const std::string &value)
+{
+  std::unique_ptr<Element> element(new Element);
+  element->setValue(value);
+  return std::move(element);
+}
 
 // MANIPULATORS
 inline void Element::setTag(const std::string &tag)
@@ -98,7 +117,7 @@ inline void Element::setValue(const std::string &value)
   d_data = value;
 }
 
-inline Element::Children &Element::children()
+inline Element::Elements &Element::children()
 {
   return d_children;
 }
@@ -110,23 +129,18 @@ inline bool Element::isElementType() const { return d_type == e_ElementType; }
 
 inline const std::string &Element::tag() const { return d_data; }
 
-template <class T>
-inline T Element::as() const
-{
-  T value;
-  std::from_chars(d_data.c_str(), d_data.c_str() + d_data.size(), value);
-  return value;
-}
+inline const std::string &Element::value() const { return d_data; }
 
-inline const Element::Children &Element::children() const { return d_children; }
+inline const Element::Elements &Element::children() const { return d_children; }
 
-inline void Element::getElementsByTagName(Children *         elements,
+template <class OutputIt>
+inline void Element::getElementsByTagName(OutputIt           outputIt,
                                           const std::string &tag)
 {
   std::copy_if(
       std::begin(d_children),
       std::end(d_children),
-      std::back_inserter(*elements),
+      outputIt,
       [tag](const auto &e) { return e->isElementType() && tag == e->tag(); });
 }
 
