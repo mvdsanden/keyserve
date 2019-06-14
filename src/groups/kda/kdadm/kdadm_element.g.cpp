@@ -115,6 +115,22 @@ TEST(ElementTest, getElementsByTagName)
   ASSERT_EQ("one", elements[1]->tag());
 }
 
+TEST(ElementTest, getFirstAttributeByName)
+{
+  // TEST GET FIRST ATTRIBUTE BY NAME
+  Element obj;
+  obj.attributes().emplace_back("one", "1");
+  obj.attributes().emplace_back("two", "2");
+  obj.attributes().emplace_back("one", "3");
+  obj.attributes().emplace_back("two", "2");
+
+  auto iter = obj.getFirstAttributeByName("one");
+  ASSERT_EQ(iter, obj.attributes().begin());
+
+  iter = obj.getFirstAttributeByName("two");
+  ASSERT_EQ(iter->second, "2");
+}
+
 TEST(ElementUtilsTest, getElementByTagName)
 {
   // TEST GET ELEMENT BY TAG NAME

@@ -107,6 +107,11 @@ public:
   void getElementsByTagName(OutputIt outputIt, const std::string &tag) const;
   // Finds all children with the specified 'tag' output those using the
   // specified 'outputIterator'.
+
+  Attributes::const_iterator
+  getFirstAttributeByName(const std::string &name) const;
+  // Return the first attribute with the specified 'name' or
+  // 'attributes().end()' if not found.
 };
 
 // ===================
@@ -124,7 +129,7 @@ struct ElementUtils
   static Iter getElementByTagName(const std::string &tag, Iter begin, Iter end);
   // Find the first element with the specified 'tag' in the specified 'begin'
   // and the specified 'end' range.
-
+  
   template <class Iter>
   static Iter getAttributeByName(const std::string &name, Iter begin, Iter end);
   // Find the first attribute with the specified 'name' in the specified 'begin'
@@ -215,6 +220,13 @@ inline void Element::getElementsByTagName(OutputIt           outputIt,
       std::end(d_children),
       outputIt,
       [tag](const auto &e) { return e->isElementType() && tag == e->tag(); });
+}
+
+inline Element::Attributes::const_iterator
+Element::getFirstAttributeByName(const std::string &name) const
+{
+  return ElementUtils::getAttributeByName(
+      name, attributes().begin(), attributes().end());
 }
 
 // -------------------
