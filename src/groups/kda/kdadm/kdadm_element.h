@@ -56,6 +56,7 @@ public:
   createElement(const std::string &tag, const AttributeSpan &attributes = AttributeSpan());
   // Return a newly created element type element with the specified 'tag' and
   // optionally the specified 'attributes'.
+  // TODO: make second createElement and use iterators instead of span for attributes!
 
   static std::unique_ptr<Element> createValue(const std::string& value);
   // Return a newly created value type element with the specified 'value'.
