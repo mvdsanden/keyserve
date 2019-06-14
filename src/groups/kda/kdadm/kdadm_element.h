@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include <gsl/span>
+
 namespace MvdS {
 namespace kdadm {
 
@@ -26,6 +28,9 @@ class Element
 public:
   // PUBLIC TYPES
   typedef std::vector<std::shared_ptr<Element>> Elements;
+  typedef std::pair<std::string, std::string>   Attribute;
+  typedef std::vector<Attribute>                Attributes;
+  typedef gsl::span<Attribute>                  AttributeSpan;
 
 private:
   
@@ -41,28 +46,35 @@ private:
   Type        d_type = e_UndefinedType;
   std::string d_data;
   Elements    d_children;
+  Attributes  d_attributes;
 
   // PRIVATE MANIPULATORS
 
 public:
   // CREATORS
-  static std::unique_ptr<Element> createElement(const std::string& tag);
-  // Return a newly created element type element with the specified 'tag'.
+  static std::unique_ptr<Element>
+  createElement(const std::string &tag, const AttributeSpan &attributes = AttributeSpan());
+  // Return a newly created element type element with the specified 'tag' and
+  // optionally the specified 'attributes'.
 
   static std::unique_ptr<Element> createValue(const std::string& value);
   // Return a newly created value type element with the specified 'value'.
   
   // MANIPULATORS
   void setTag(const std::string& tag);
-  // Set the tag name of the element. Behavior is undefined if 'setValue()' was
-  // called before this call.
+  // Set the tag name of the element. This implicitly makes this an element type
+  // element. Behavior is undefined if 'setValue()' was called before this call.
 
   void setValue(const std::string& value);
-  // Set the value of the element. Behavior is undefined if 'setTag()' was
-  // called before this call.
+  // Set the value of the element. This implicitly makes this a value type
+  // element. Behavior is undefined if 'setTag()' was called before this call.
 
   Elements& children();
-  // Return all children.
+  // Return all children. Behavior is undefined unless 'isElementType() ==
+  // true'.
+
+  Attributes& attributes();
+  // Return all attributes.
   
   // ACCESSORS
   bool isValueType() const;
@@ -73,7 +85,7 @@ public:
   
   const std::string& tag() const;
   // Return the tag name of the element. Behavior is undefined unless
-  // 'isValueType() == false'.
+  // 'isElementType() == true'.
 
   const std::string& value() const;
   // Return the satring value of the elemen. Behavior is undefined unless
@@ -81,6 +93,10 @@ public:
 
   const Elements& children() const;
   // Return all children.
+
+  const Attributes& attributes() const;
+  // Return all attributes. Behavior is undefined unless 'isElementType() ==
+  // true'.
 
   template <class OutputIt>
   void getElementsByTagName(OutputIt outputIt, const std::string &tag);
@@ -95,10 +111,12 @@ public:
 // --------------
 
 // CREATORS
-inline std::unique_ptr<Element> Element::createElement(const std::string &tag)
+inline std::unique_ptr<Element>
+Element::createElement(const std::string &tag, const AttributeSpan &attributes)
 {
   std::unique_ptr<Element> element(new Element);
   element->setTag(tag);
+  element->attributes().insert(element->attributes().end(), std::begin(attributes), std::end(attributes));
   return std::move(element);
 }
 
@@ -127,6 +145,8 @@ inline Element::Elements &Element::children()
   return d_children;
 }
 
+inline Element::Attributes &Element::attributes() { return d_attributes; }
+
 // ACCESSORS
 inline bool Element::isValueType() const { return d_type == e_ValueType; }
 
@@ -144,6 +164,11 @@ inline const std::string &Element::value() const {
 }
 
 inline const Element::Elements &Element::children() const { return d_children; }
+
+inline const Element::Attributes &Element::attributes() const
+{
+  return d_attributes;
+}
 
 template <class OutputIt>
 inline void Element::getElementsByTagName(OutputIt           outputIt,

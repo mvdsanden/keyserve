@@ -28,7 +28,7 @@ TEST(ElementTest, setValue)
   obj.setValue("test");
   ASSERT_TRUE(obj.isValueType());
   ASSERT_FALSE(obj.isElementType());
-  ASSERT_EQ("test", obj.tag());
+  ASSERT_EQ("test", obj.value());
 }
 
 TEST(ElementTest, setTag)
@@ -59,6 +59,20 @@ TEST(ElementTest, createElement)
     ASSERT_TRUE(obj->children().empty());
     ASSERT_EQ("test", obj->tag());
   }
+
+  {
+    Element::Attributes attributes;
+    attributes.emplace_back("test", "one");
+    attributes.emplace_back("test", "two");
+    std::shared_ptr<Element> obj = Element::createElement("test", attributes);
+    ASSERT_FALSE(obj->isValueType());
+    ASSERT_TRUE(obj->isElementType());
+    ASSERT_TRUE(obj->children().empty());
+    ASSERT_EQ("test", obj->tag());
+    ASSERT_EQ(2, obj->attributes().size());
+    ASSERT_EQ(obj->attributes()[0], Element::Attribute("test", "one"));
+    ASSERT_EQ(obj->attributes()[1], Element::Attribute("test", "two"));
+  }  
 }
 
 TEST(ElementTest, createValue)
@@ -100,7 +114,6 @@ TEST(ElementTest, getElementByTagName)
   ASSERT_EQ("one", elements[0]->tag());
   ASSERT_EQ("one", elements[1]->tag());
 }
- 
 
 int main(int argc, char **argv)
 {

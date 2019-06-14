@@ -25,11 +25,15 @@ struct Context : public kdadp::SaxDocumentHandler
                     const Attributes & attributes) override
   {
     std::shared_ptr<kdadm::Element> element = kdadm::Element::createElement(name);
+
+    element->attributes().insert(element->attributes().end(),
+                                 std::begin(attributes),
+                                 std::end(attributes));
+
     if (!d_root) {
       d_root = element;
-    }
-
-    if (!d_stck.empty()) {
+    } else {
+      assert(!d_stck.empty());
       d_stck.top()->children().emplace_back(element);
     }
     
