@@ -146,7 +146,7 @@ TEST(ElementUtilsTest, getAttributeByName)
   Element obj;
   obj.attributes().emplace_back("one", "1");
   obj.attributes().emplace_back("two", "2");
-  obj.attributes().emplace_back("one", "1");
+  obj.attributes().emplace_back("one", "3");
   obj.attributes().emplace_back("two", "2");
 
   auto iter = ElementUtils::getAttributeByName(
@@ -154,12 +154,12 @@ TEST(ElementUtilsTest, getAttributeByName)
   ASSERT_EQ(obj.attributes().begin(), iter);
   ASSERT_EQ(*iter, (std::make_pair<std::string, std::string>("one", "1")));
 
-  // iter = ElementUtils::getAttributeByName("one", iter + 1, obj.attributes().end());
-  // ASSERT_NE(obj.attributes().begin(), iter);
-  // ASSERT_EQ((*iter)->tag(), "one");
+  iter = ElementUtils::getAttributeByName("one", iter + 1, obj.attributes().end());
+  ASSERT_NE(obj.attributes().begin(), iter);
+  ASSERT_EQ(*iter, (std::make_pair<std::string, std::string>("one", "3")));
 
-  // iter = ElementUtils::getAttributeByName("one", iter + 1, obj.attributes().end());
-  // ASSERT_EQ(obj.attributes().end(), iter);  
+  iter = ElementUtils::getAttributeByName("one", iter + 1, obj.attributes().end());
+  ASSERT_EQ(obj.attributes().end(), iter);  
 }
 
 int main(int argc, char **argv)
