@@ -163,6 +163,18 @@ function(mvds_add_adapter name)
         endif()
     endforeach(member)
 
+
+    foreach(member ${members})
+        set(src "${CMAKE_CURRENT_SOURCE_DIR}/${member}.g.cpp")
+
+        if(EXISTS ${src})
+            add_executable("${member}.g.tsk" ${src})
+            target_include_directories("${member}.g.tsk" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+            target_link_libraries("${member}.g.tsk" ${name} ${GTEST_LIBRARIES} pthread)
+        endif()
+    endforeach(member)
+
+    
 endfunction(mvds_add_adapter)
 
 

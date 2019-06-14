@@ -1,12 +1,12 @@
-// kdadm_document.cpp                                                 -*-c++-*-
-#include <kdadm_document.h>
+// kdadp_saxparser.cpp                                                -*-c++-*-
+#include <kdadp_saxparser.h>
 
 namespace MvdS {
-namespace kdadm {
+namespace kdadp {
 
-// ---------------
-// Class: Document
-// ---------------
+// ----------------
+// Class: SaxParser
+// ----------------
 
 // CREATORS
 
@@ -14,7 +14,7 @@ namespace kdadm {
 
 // ACCESSORS
 
-} // namespace kdadm
+} // namespace kdadp
 } // namespace MvdS
 
 // ----------------------------------------------------------------------------

@@ -2,10 +2,11 @@
 #ifndef INCLUDED_KDADM_ELEMENT
 #define INCLUDED_KDADM_ELEMENT
 
+#include <algorithm>
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 namespace MvdS {
 namespace kdadm {
@@ -16,7 +17,11 @@ namespace kdadm {
 
 class Element
 {
-  // ...
+  // Provides a document element for a simplified DOM.
+  //
+  // There are two types of elements:
+  // * ElementType: contains a tag.
+  // * ValueType: contains a string.
 
 public:
   // PUBLIC TYPES
@@ -127,9 +132,16 @@ inline bool Element::isValueType() const { return d_type == e_ValueType; }
 
 inline bool Element::isElementType() const { return d_type == e_ElementType; }
 
-inline const std::string &Element::tag() const { return d_data; }
+inline const std::string &Element::tag() const
+{
+  assert(isElementType());
+  return d_data;
+}
 
-inline const std::string &Element::value() const { return d_data; }
+inline const std::string &Element::value() const {
+  assert(isValueType());
+  return d_data;
+}
 
 inline const Element::Elements &Element::children() const { return d_children; }
 

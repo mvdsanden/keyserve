@@ -1,5 +1,6 @@
 // kdadm_document.t.cpp                                               -*-c++-*-
 #include <kdadm_document.h>
+#include <kdadm_element.h>
 
 #include <gtest/gtest.h>
 
@@ -17,6 +18,20 @@ TEST(DocumentTest, Constructor)
   //   Construct the object.
   Document obj;
 }
+
+TEST(DocumentTest, GetSetRoot)
+{
+  // TEST SET/GET ROOT ELEMENT
+  Document obj;
+
+  obj.setRoot(Element::createElement("root"));
+
+  std::shared_ptr<Element> element = obj.root();
+
+  ASSERT_NE(nullptr, element);
+  ASSERT_EQ("root", element->tag());
+}
+
 
 int main(int argc, char **argv)
 {
