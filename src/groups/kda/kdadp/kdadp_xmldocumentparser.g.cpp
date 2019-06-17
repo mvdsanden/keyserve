@@ -42,7 +42,6 @@ TEST(XmlDocumentParserTest, Parse)
   ASSERT_EQ("two", doc.root()->children()[1]->children()[0]->tag());
 }
 
-
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
