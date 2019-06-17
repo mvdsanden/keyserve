@@ -42,14 +42,14 @@ addAdapterClass(){
     ADAPTERNAME=$1
 
     if [ "" = "$ADAPTERNAME" ]; then
-	echo "Please run this script in the package root directory."
+	echo "Please run this script in the adapter root directory."
 	exit 2
     fi
 
     NAMEBASE="${ADAPTERNAME,,}_${CLASSNAME,,}"
     
     if grep -xq "$NAMEBASE" adapter/members; then
-	echo "Class $CLASSNAME is already a member of $NAME."
+	echo "Class $CLASSNAME is already a member of $ADAPTERNAME."
 	exit 3
     fi
 
@@ -59,6 +59,30 @@ addAdapterClass(){
     $BASE/gen_header.sh $ROOT_NS $ADAPTERNAME $CLASSNAME > "${ADAPTERNAME,,}_${CLASSNAME,,}.h"
     $BASE/gen_source.sh $ROOT_NS $ADAPTERNAME $CLASSNAME > "${ADAPTERNAME,,}_${CLASSNAME,,}.cpp"
     $BASE/gen_test.sh $ROOT_NS $ADAPTERNAME $CLASSNAME > "${ADAPTERNAME,,}_${CLASSNAME,,}.g.cpp"
+}
+
+addApplicationClass(){
+
+    APPLICATIONNAME=$1
+
+    if [ "" = "$APPLICATIONNAME" ]; then
+	echo "Please run this script in the application root directory."
+	exit 2
+    fi
+
+    NAMEBASE="${APPLICATIONNAME,,}_${CLASSNAME,,}"
+    
+    if grep -xq "$NAMEBASE" application/members; then
+	echo "Class $CLASSNAME is already a member of $APPLICATIONNAME."
+	exit 3
+    fi
+
+    echo $NAMEBASE >> application/members
+    
+    echo "Creating class $ROOT_NS::$APPLICATIONNAME::$CLASSNAME"
+    $BASE/gen_header.sh $ROOT_NS $APPLICATIONNAME $CLASSNAME > "${APPLICATIONNAME,,}_${CLASSNAME,,}.h"
+    $BASE/gen_source.sh $ROOT_NS $APPLICATIONNAME $CLASSNAME > "${APPLICATIONNAME,,}_${CLASSNAME,,}.cpp"
+    $BASE/gen_test.sh $ROOT_NS $APPLICATIONNAME $CLASSNAME > "${APPLICATIONNAME,,}_${CLASSNAME,,}.g.cpp"
 }
 
 

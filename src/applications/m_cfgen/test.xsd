@@ -11,6 +11,6 @@
   </xs:complexType>
 
 
-  <xs:element name="note" type='Note'\>
+  <xs:element name="note" type='Note'/>
 
 </xs:schema>

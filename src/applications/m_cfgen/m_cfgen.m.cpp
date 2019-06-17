@@ -1,5 +1,6 @@
 // m_cfgen.m.cpp                                              -*-c++-*-
 #include <m_cfgen_commandlineargs.h>
+#include <m_cfgen_codegenerator.h>
 
 #include <kdadm_document.h>
 #include <kdadp_xmldocumentparser.h>
@@ -14,10 +15,10 @@ using namespace MvdS::m_cfgen;
 namespace {
 
   template <class T, class U>
-  std::shared_ptr<U> openStream(const std::string& name, U *def)
+  std::shared_ptr<U> openStream(const std::string& name, U *defaultStream)
   {
     if ("-" == name) {
-      return std::shared_ptr<U>(def, [](U *obj) {});
+      return std::shared_ptr<U>(defaultStream, [](U *obj) {});
     }
 
     return std::make_shared<T>(name);
@@ -42,6 +43,7 @@ int main(int argc, char *argv[])
 
     auto inputStream = openStream<std::ifstream>(arguments.input(), &std::cin);
     if (!inputStream || !*inputStream.get()) {
+      std::cerr << "Error opening input stream.\n";
       return 2;
     }
 
@@ -51,16 +53,16 @@ int main(int argc, char *argv[])
   }
 
   {
-    //    CodeGenerator codeGenerator(args, document);
+    CodeGenerator codeGenerator(arguments);
 
-    // auto outputStream = openStream<std::ofstream>(args.output());
-    // if (!outputStream || !*outputStream.get()) {
-    //   return 3;
-    // }
+    auto outputStream = openStream<std::ofstream>(arguments.output(), &std::cout);
+    if (!outputStream || !*outputStream.get()) {
+      return 3;
+    }
 
-    // if (!codeGenerator.generate(outputStream.get())) {
-    //   return 5;
-    // }
+    if (!codeGenerator.generate(*outputStream.get(), document)) {
+      return 5;
+    }
   }
   
   return 0;
