@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
+  <xs:internalType name='xs:string' cpp='std::string'/>
+  
   <xs:complexType name='Note'>
     <xs:sequence>
       <xs:element name="to" type="xs:string"/>

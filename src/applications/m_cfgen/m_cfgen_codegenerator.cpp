@@ -3,6 +3,7 @@
 #include <kdadm_element.h>
 
 #include <iostream>
+#include <unordered_map>
 
 namespace MvdS {
 namespace m_cfgen {
@@ -10,8 +11,10 @@ namespace m_cfgen {
 namespace {
   struct Context {
 
-    std::vector<std::shared_ptr<kdadm::Element>> d_complexTypes;
+    std::unordered_map<std::string, std::shared_ptr<kdadm::Element>> d_complexTypes;
     std::vector<std::shared_ptr<kdadm::Element>> d_element;
+
+    
 
   };
 
@@ -26,7 +29,7 @@ namespace {
       : d_context(context)
     {}
     
-    void operator=(const std::shared_ptr<kdadm::Element>& element)
+    void operator=(std::shared_ptr<kdadm::Element> element)
     {
       std::cout << "Element: " << element->tag() << "\n";
 
@@ -50,9 +53,16 @@ namespace {
 
       std::string typeName = typeIter->second;
 
-      auto actualTypeIter = std::find(typeName, d_context...
+      auto actualTypeIter = d_context->d_complexTypes.find(typeName);
+
+      if (d_context->d_complexTypes.end() == actualTypeIter) {
+	std::cerr << "Unknown type: " << typeName << "\n";
+	return;
+      }
     }
 
+    ElementTypeValidator& operator*() { return *this; }
+    
     void operator++()
     {
     }
@@ -67,7 +77,7 @@ namespace {
       : d_context(context)
     {}
     
-    void operator=(const std::shared_ptr<kdadm::Element>& element)
+    void operator=(std::shared_ptr<kdadm::Element> element)
     {
       std::cout << "ComplexType: " << element->tag() << "\n";
 
@@ -81,25 +91,65 @@ namespace {
 
       std::string typeName = nameIter->second;
 
-      auto sequence =
+      auto sequenceIter =
           kdadm::ElementUtils::getElementByTagName("xs:sequence",
                                                    element->children().begin(),
                                                    element->children().end());
 
-      if (element->children().end() == sequence) {
+      if (element->children().end() == sequenceIter) {
 	std::cerr << "Log: no sequence in complex type: " << typeName << "\n";
 	return;
       }
 
+      auto sequence = *sequenceIter;
+      
       ElementTypeValidator elementTypeValidator(d_context);
-      (*sequence)->getElementsByTagName(&elementTypeValidator, "xs:element");
+      sequence->getElementsByTagName(elementTypeValidator, "xs:element");
 
-      d_context->d_complexTypes.emplace_back(element);
+      if (d_context->d_complexTypes.find(typeName) != d_context->d_complexTypes.end()) {
+	std::cerr << "Type already defined: " << typeName << "\n";
+      }
+      d_context->d_complexTypes.insert(std::make_pair(typeName, sequence));
     }
 
     void operator++()
     {
     }
+
+    ComplexTypeValidator& operator*() { return *this; }
+    
+  };
+
+  struct InternalTypeValidator {
+
+    Context *d_context;
+
+    InternalTypeValidator(Context *context)
+      : d_context(context)
+    {}
+    
+    void operator=(std::shared_ptr<kdadm::Element> element)
+    {
+      std::cout << "InternalType: " << element->tag() << "\n";
+
+      auto nameIter = kdadm::ElementUtils::getAttributeByName(
+          "name", element->attributes().begin(), element->attributes().end());
+
+      if (element->attributes().end() == nameIter) {
+	std::cerr << "Internal type has no name.\n";
+	return;
+      }
+
+      std::string typeName = nameIter->second;
+
+      d_context->d_complexTypes.insert(std::make_pair(typeName, element));
+    }
+
+    void operator++()
+    {
+    }
+
+    InternalTypeValidator& operator*() { return *this; }
     
   };
 
@@ -112,15 +162,13 @@ namespace {
       return false;
     }
 
-    // for (auto child : root->children()) {
-    //   std::cout << "- " << (child->isElementType()?child->tag():child->value()) << ".\n";
-    // }
-    
+    InternalTypeValidator internalTypeValidator(context);
     ComplexTypeValidator complexTypeValidator(context);
     ElementTypeValidator elementTypeValidator(context);
     
-    root->getElementsByTagName(&complexTypeValidator, "xs:complexType");
-    root->getElementsByTagName(&elementTypeValidator, "xs:element");
+    root->getElementsByTagName(internalTypeValidator, "xs:internalType");
+    root->getElementsByTagName(complexTypeValidator, "xs:complexType");
+    root->getElementsByTagName(elementTypeValidator, "xs:element");
 
     return true;
   }
