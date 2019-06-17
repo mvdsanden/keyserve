@@ -109,6 +109,16 @@ function(mvds_add_application name)
         endif()
     endforeach(member)
 
+    foreach(member ${members})
+        set(src "${CMAKE_CURRENT_SOURCE_DIR}/${member}.g.cpp")
+
+        if(EXISTS ${src})
+            add_executable("${member}.g.tsk" ${src})
+            target_include_directories("${member}.g.tsk" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+            target_link_libraries("${member}.g.tsk" ${name} ${GTEST_LIBRARIES} pthread)
+        endif()
+    endforeach(member)
+    
     add_executable("${name}.tsk" "${CMAKE_CURRENT_SOURCE_DIR}/${name}.m.cpp")
     target_include_directories("${name}.tsk" PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries("${name}.tsk" "${name}")

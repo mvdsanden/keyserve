@@ -1,4 +1,6 @@
 // m_cfgen.m.cpp                                              -*-c++-*-
+#include <m_cfgen_commandlineargs.h>
+
 #include <kdadm_document.h>
 #include <kdadp_xmldocumentparser.h>
 
@@ -7,15 +9,15 @@
 #include <fstream>
 
 using namespace MvdS;
-//using namespace MvdS::m_cfgen;
+using namespace MvdS::m_cfgen;
 
 namespace {
 
-  template <class T>
-  std::shared_ptr<T> openStream(const std::string& name)
+  template <class T, class U>
+  std::shared_ptr<U> openStream(const std::string& name, U *def)
   {
     if ("-" == name) {
-      return std::shared_ptr<T>(&std::cin, [](std::istream *obj) {});
+      return std::shared_ptr<U>(def, [](U *obj) {});
     }
 
     return std::make_shared<T>(name);
@@ -25,25 +27,27 @@ namespace {
 
 int main(int argc, char *argv[])
 {
-  // CmdlineArguments args;
-  // if (!CmdlineArgumentsUtils::parse(&args, argc, argv)) {
-  //   CmdlineArgumentsUtils::printUsage(argc, argv);
-  //   return 1;
-  // }
+  CommandlineArgs arguments;
+  CommandlineArgsUtil::parse(&arguments, {argv, argc});
+
+  if (arguments.printUsage()) {
+    CommandlineArgsUtil::printUsage(&std::cout, {argv, argc});
+    return 1;
+  }
 
   kdadm::Document document;
 
   {
     kdadp::XmlDocumentParser parser;
 
-    // auto inputStream = openStream<std::ifstream>(args.input());
-    // if (!inputStream || !*inputStream.get()) {
-    //   return 2;
-    // }
+    auto inputStream = openStream<std::ifstream>(arguments.input(), &std::cin);
+    if (!inputStream || !*inputStream.get()) {
+      return 2;
+    }
 
-    // if (!parser.parse(&document, inputStream.get())) {
-    //   return 4;
-    // }
+    if (!parser.parse(&document, *inputStream.get())) {
+      return 4;
+    }
   }
 
   {
