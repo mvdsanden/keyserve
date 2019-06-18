@@ -18,6 +18,8 @@ struct SaxDocumentHandler
   typedef std::pair<std::string, std::string> Attribute;
   typedef gsl::span<Attribute>                Attributes;
 
+  virtual void location(size_t lineNumber, size_t columnNumber) = 0;
+  
   virtual void startDocument() = 0;
   // Called at the start of a document.
 

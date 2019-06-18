@@ -19,10 +19,32 @@ namespace {
 
 struct ParserContext
 {
+  XML_Parser                                        d_parser;
   kdadp::SaxDocumentHandler *                       d_documentHandler;
   std::string                                       d_data;
   std::vector<kdadp::SaxDocumentHandler::Attribute> d_attributes;
+  size_t                                            d_lineNumber;
+  size_t                                            d_columnNumber;
 
+  ParserContext(XML_Parser parser)
+    : d_parser(parser)
+  {}
+
+  void updateLocation()
+  {
+    size_t lineNumber   = XML_GetCurrentLineNumber(d_parser);
+    size_t columnNumber = XML_GetCurrentColumnNumber(d_parser);
+
+    if (lineNumber == d_lineNumber &&
+	columnNumber == d_columnNumber) {
+      return;
+    }
+
+    d_documentHandler->location(lineNumber, columnNumber);
+    d_lineNumber   = lineNumber;
+    d_columnNumber = columnNumber;
+  }
+  
   void parseName(const XML_Char *name)
   // Parse the specified 'name' to 'd_name'.
   {
@@ -80,6 +102,7 @@ struct ParserContext
 void startElement(void *userData, const XML_Char *name, const XML_Char **atts)
 {  
   auto context = reinterpret_cast<ParserContext *>(userData);
+  context->updateLocation();
   context->parseName(name);
   context->parseAttributes(atts);
   context->startElement();
@@ -88,6 +111,7 @@ void startElement(void *userData, const XML_Char *name, const XML_Char **atts)
 void characterData(void *userData, const XML_Char *s, int len)
 {
   auto context = reinterpret_cast<ParserContext *>(userData);
+  context->updateLocation();
   context->parseCharacterData({s, len});
   context->characterData();
 }
@@ -95,6 +119,7 @@ void characterData(void *userData, const XML_Char *s, int len)
 void comment(void *userData, const XML_Char *data)
 {
   auto context = reinterpret_cast<ParserContext *>(userData);
+  context->updateLocation();
   context->parseComment(data);
   context->comment();  
 }
@@ -102,6 +127,7 @@ void comment(void *userData, const XML_Char *data)
 void endElement(void *userData, const XML_Char *name)
 {
   auto context = reinterpret_cast<ParserContext *>(userData);
+  context->updateLocation();
   context->parseName(name);
   context->endElement();
 }
@@ -123,11 +149,11 @@ void SaxParser::setDocumentHandler(kdadp::SaxDocumentHandler *documentHandler)
 bool SaxParser::parse(const gsl::span<char> &data)
 {
   assert(nullptr != d_documentHandler);
-  
-  ParserContext context;
-  context.d_documentHandler = d_documentHandler;
 
   XML_Parser parser = XML_ParserCreate(NULL);
+  
+  ParserContext context(parser);
+  context.d_documentHandler = d_documentHandler;
 
   XML_SetUserData(parser, &context);
   XML_SetElementHandler(parser, startElement, endElement);
@@ -148,11 +174,11 @@ bool SaxParser::parse(const gsl::span<char> &data)
 bool SaxParser::parse(std::istream &stream)
 {
   assert(nullptr != d_documentHandler);
-  
-  ParserContext context;
-  context.d_documentHandler = d_documentHandler;
 
   XML_Parser parser = XML_ParserCreate(NULL);
+  
+  ParserContext context(parser);
+  context.d_documentHandler = d_documentHandler;
 
   XML_SetUserData(parser, &context);
   XML_SetElementHandler(parser, startElement, endElement);

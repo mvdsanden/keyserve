@@ -18,7 +18,15 @@ struct Context : public kdadp::SaxDocumentHandler
 {
   std::shared_ptr<kdadm::Element>             d_root;
   std::stack<std::shared_ptr<kdadm::Element>> d_stck;
+  size_t                                      d_lineNumber;
+  size_t                                      d_columnNumber;
 
+  void location(size_t lineNumber, size_t columnNumber) override
+  {
+    d_lineNumber   = lineNumber;
+    d_columnNumber = columnNumber;
+  }
+  
   void startDocument() override {}
 
   void startElement(const std::string &name,
