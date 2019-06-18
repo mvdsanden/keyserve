@@ -36,10 +36,10 @@ struct MockDocumentHandler : public kdadp::SaxDocumentHandler
                     const Attributes & attributes) override
   {
     d_startElements.emplace_back(
-        std::make_tuple(name,
-                        std::vector(attributes.begin(), attributes.end()),
-                        d_lineNumber,
-                        d_columnNumber));
+        name,
+        std::vector(attributes.begin(), attributes.end()),
+        d_lineNumber,
+        d_columnNumber);
   }
 
   void characterData(const std::string& data) override
