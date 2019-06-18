@@ -29,6 +29,7 @@ private:
   Strings     d_positional;
   std::string d_input;
   std::string d_output;
+  std::string d_language = "c++";
   bool        d_printUsage = false;
 
   // PRIVATE MANIPULATORS
@@ -49,6 +50,9 @@ public:
   std::string &output();
   // Return output filename.
 
+  std::string &language();
+  // Return output language.
+  
   void printUsage(bool on);
   // Set print usage flag to the specified 'on'.
   
@@ -61,6 +65,9 @@ public:
 
   const std::string &output() const;
   // Return output filename.
+
+  const std::string &language() const;
+  // Return output language.
   
   bool printUsage() const;
   // Return 'true' if the print usage flag is set.

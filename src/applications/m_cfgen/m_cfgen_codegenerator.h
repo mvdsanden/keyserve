@@ -2,10 +2,12 @@
 #ifndef INCLUDED_M_CFGEN_CODEGENERATOR
 #define INCLUDED_M_CFGEN_CODEGENERATOR
 
-#include <m_cfgen_commandlineargs.h>
-#include <kdadm_document.h>
+#include <iosfwd>
 
 namespace MvdS {
+  
+namespace kdadm { class Document; } // forward declaration
+  
 namespace m_cfgen {
 
 // ====================
@@ -15,24 +17,10 @@ namespace m_cfgen {
 class CodeGenerator
 {
   // ...
-
-  // TYPES
-
-  // DATA
-
-  // PRIVATE MANIPULATORS
-
 public:
-  // CREATORS
-  CodeGenerator(const CommandlineArgs& arguments);
-  // Create code generator using the specified 'arguments'.
-
   // MANIPULATORS
-  bool generate(std::ostream& stream, const kdadm::Document& document);
-  // Generate the code to the specified 'stream' using the specified 'document'
-  // as source.
-
-  // ACCESSORS
+  virtual bool generate(const kdadm::Document &document) = 0;
+  // Generate code for the specified 'document'. Return 'true' on success.
 };
 
 } // namespace m_cfgen

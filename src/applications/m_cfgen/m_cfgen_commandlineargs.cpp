@@ -75,6 +75,16 @@ class ArgumentTable
     obj->output() = args[1];
     return 2; // parsed two elements from 'args'.
   }
+
+  static size_t parseLanguage(CommandlineArgs *            obj,
+                            gsl::span<const char *const> args)
+  {
+    if (2 > args.size()) {
+      return 0;
+    }
+    obj->language() = args[1];
+    return 2; // parsed two elements from 'args'.
+  }
   
   static size_t parseHelp(CommandlineArgs *            obj,
                           gsl::span<const char *const> args)
@@ -93,6 +103,7 @@ public:
   {
     append("--input", "-i", parseInput, "Input filename or '-' for standard in.");
     append("--output", "-o", parseOutput, "Output filename of '-' for standard out.");
+    append("--language", "-l", parseLanguage, "Language to use (default: c++).");
     append("--help", "-h", parseHelp, "Print usage information");
   }
 
@@ -170,6 +181,8 @@ std::string &CommandlineArgs::input() { return d_input; }
 
 std::string &CommandlineArgs::output() { return d_output; }
 
+std::string &CommandlineArgs::language() { return d_language; }
+  
 void CommandlineArgs::printUsage(bool on) { d_printUsage = on; }
 
 // ACCESSORS
@@ -182,6 +195,8 @@ const std::string &CommandlineArgs::input() const { return d_input; }
 
 const std::string &CommandlineArgs::output() const { return d_output; }
 
+const std::string &CommandlineArgs::language() const { return d_language; }
+  
 bool CommandlineArgs::printUsage() const { return d_printUsage; }
 
 // --------------------------

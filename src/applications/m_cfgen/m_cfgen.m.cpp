@@ -1,5 +1,7 @@
 // m_cfgen.m.cpp                                              -*-c++-*-
 #include <m_cfgen_commandlineargs.h>
+#include <m_cfgen_validator.h>
+#include <m_cfgen_codegeneratorfactory.h>
 #include <m_cfgen_codegenerator.h>
 
 #include <kdadm_document.h>
@@ -73,21 +75,26 @@ int main(int argc, char *argv[])
     }
 
     if (!parser.parse(&document, *inputStream.get(), arguments.input())) {
+      return 3;
+    }
+  }
+
+  {
+    Validator validator(arguments);
+
+    if (!validator.validate(&document)) {
       return 4;
     }
   }
 
   {
-    CodeGenerator codeGenerator(arguments);
-
-    auto outputStream = openStream<std::ofstream>(arguments.output(), &std::cout);
-    if (!outputStream || !*outputStream.get()) {
-      return 3;
+    CodeGeneratorFactory factory;
+    std::unique_ptr<CodeGenerator> generator(factory.create(arguments));
+    if (!generator) {
+      return 6;
     }
 
-    if (!codeGenerator.generate(*outputStream.get(), document)) {
-      return 5;
-    }
+    generator->generate(document);
   }
   
   return 0;

@@ -1,10 +1,22 @@
-// m_cfgen_codegenerator.t.cpp                                        -*-c++-*-
-#include <m_cfgen_codegenerator.h>
+// m_cfgen_cppcodegenerator.t.cpp                                     -*-c++-*-
+#include <m_cfgen_cppcodegenerator.h>
 
 #include <gtest/gtest.h>
 
 using namespace MvdS;
 using namespace MvdS::m_cfgen;
+
+TEST(CppCodeGeneratorTest, Constructor)
+{
+  // TEST CONSTRUCTOR
+  //
+  // Concern:
+  //   The objects constructor should work.
+  //
+  // Test plan:
+  //   Construct the object.
+  //  CppCodeGenerator obj;
+}
 
 int main(int argc, char **argv)
 {
