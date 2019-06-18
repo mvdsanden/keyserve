@@ -31,6 +31,8 @@ TEST(XmlDocumentParserTest, Parse)
   std::istringstream stream(xml);
   ASSERT_TRUE(obj.parse(&doc, stream));
   ASSERT_EQ("root", doc.root()->tag());
+  ASSERT_EQ(doc.root()->location().d_lineNumbers.first, 1);
+  ASSERT_EQ(doc.root()->location().d_lineNumbers.second, 2);
   ASSERT_EQ(2, doc.root()->attributes().size());
   ASSERT_EQ(doc.root()->attributes()[0], (std::make_pair<std::string, std::string>("attr", "123456")));
   ASSERT_EQ(doc.root()->attributes()[1], (std::make_pair<std::string, std::string>("one", "1")));

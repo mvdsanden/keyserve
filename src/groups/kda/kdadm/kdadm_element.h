@@ -31,6 +31,11 @@ public:
   typedef std::pair<std::string, std::string>   Attribute;
   typedef std::vector<Attribute>                Attributes;
 
+  struct Location {
+    std::pair<size_t, size_t> d_lineNumbers;
+    std::pair<size_t, size_t> d_columnNumbers;
+  };
+
 private:
   
   // TYPES
@@ -46,6 +51,7 @@ private:
   std::string d_data;
   Elements    d_children;
   Attributes  d_attributes;
+  Location    d_location;
 
   // PRIVATE MANIPULATORS
 
@@ -80,6 +86,9 @@ public:
 
   Attributes& attributes();
   // Return all attributes.
+
+  Location& location();
+  // Return the element file location.
   
   // ACCESSORS
   bool isValueType() const;
@@ -102,6 +111,9 @@ public:
   const Attributes& attributes() const;
   // Return all attributes. Behavior is undefined unless 'isElementType() ==
   // true'.
+
+  const Location& location() const;
+  // Return the element file location.
 
   template <class OutputIt>
   void getElementsByTagName(OutputIt outputIt, const std::string &tag) const;
@@ -188,6 +200,8 @@ inline Element::Elements &Element::children()
 
 inline Element::Attributes &Element::attributes() { return d_attributes; }
 
+inline Element::Location& Element::location() { return d_location; }
+
 // ACCESSORS
 inline bool Element::isValueType() const { return d_type == e_ValueType; }
 
@@ -210,6 +224,8 @@ inline const Element::Attributes &Element::attributes() const
 {
   return d_attributes;
 }
+
+inline const Element::Location &Element::location() const { return d_location; }
 
 template <class OutputIt>
 inline void Element::getElementsByTagName(OutputIt           outputIt,

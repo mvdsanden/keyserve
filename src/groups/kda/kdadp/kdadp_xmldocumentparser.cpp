@@ -38,6 +38,9 @@ struct Context : public kdadp::SaxDocumentHandler
                                  std::begin(attributes),
                                  std::end(attributes));
 
+    element->location().d_lineNumbers   = {d_lineNumber, d_lineNumber};
+    element->location().d_columnNumbers = {d_columnNumber, d_columnNumber};
+
     if (!d_root) {
       d_root = element;
     } else {
@@ -63,7 +66,10 @@ struct Context : public kdadp::SaxDocumentHandler
     }
     
     std::shared_ptr<kdadm::Element> element = kdadm::Element::createValue(data);
-    
+
+    element->location().d_lineNumbers   = {d_lineNumber, d_lineNumber};
+    element->location().d_columnNumbers = {d_columnNumber, d_columnNumber};
+
     d_stck.top()->children().emplace_back(element);
   }
 
@@ -75,6 +81,8 @@ struct Context : public kdadp::SaxDocumentHandler
   {
     assert(!d_stck.empty());
     assert(name == d_stck.top()->tag());
+    d_stck.top()->location().d_lineNumbers.second   = d_lineNumber;
+    d_stck.top()->location().d_columnNumbers.second = d_columnNumber;
     d_stck.pop();
   }
 
