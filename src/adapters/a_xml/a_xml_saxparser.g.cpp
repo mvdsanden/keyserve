@@ -13,7 +13,8 @@ struct MockDocumentHandler : public kdadp::SaxDocumentHandler
   typedef gsl::span<Attribute>                Attributes;
 
   // PUBLIC DATA
-  std::vector<std::pair<std::string, std::vector<Attribute>>> d_startElements;
+  std::vector<std::tuple<std::string, std::vector<Attribute>, size_t, size_t>>
+                                                              d_startElements;
   std::vector<std::string>                                    d_text;
   std::vector<std::string>                                    d_endElements;
   std::vector<std::string>                                    d_comments;
@@ -34,8 +35,11 @@ struct MockDocumentHandler : public kdadp::SaxDocumentHandler
   void startElement(const std::string &name,
                     const Attributes & attributes) override
   {
-    d_startElements.emplace_back(std::make_pair(
-        name, std::vector(attributes.begin(), attributes.end())));
+    d_startElements.emplace_back(
+        std::make_tuple(name,
+                        std::vector(attributes.begin(), attributes.end()),
+                        d_lineNumber,
+                        d_columnNumber));
   }
 
   void characterData(const std::string& data) override
@@ -71,15 +75,15 @@ TEST(SaxParserTest, ParseStream)
     ASSERT_EQ(handler.d_columnNumber, 0);
     ASSERT_TRUE(obj.parse(stream));
     ASSERT_EQ(3, handler.d_startElements.size());
-    ASSERT_EQ("root", handler.d_startElements[0].first);
-    ASSERT_EQ("name", handler.d_startElements[0].second[0].first);
-    ASSERT_EQ("test", handler.d_startElements[0].second[0].second);
-    ASSERT_EQ("one", handler.d_startElements[1].first);
+    ASSERT_EQ("root", std::get<0>(handler.d_startElements[0]));
+    ASSERT_EQ("name", std::get<1>(handler.d_startElements[0])[0].first);
+    ASSERT_EQ("test", std::get<1>(handler.d_startElements[0])[0].second);
+    ASSERT_EQ("one", std::get<0>(handler.d_startElements[1]));
     ASSERT_EQ(3, handler.d_text.size());
     ASSERT_EQ("two ten", handler.d_text[0]);
     ASSERT_EQ("\n", handler.d_text[1]);
     ASSERT_EQ("eleven", handler.d_text[2]);
-    ASSERT_EQ("three", handler.d_startElements[2].first);
+    ASSERT_EQ("three", std::get<0>(handler.d_startElements[2]));
     ASSERT_EQ(3, handler.d_endElements.size());
     ASSERT_EQ("one", handler.d_endElements[0]);
     ASSERT_EQ("three", handler.d_endElements[1]);
@@ -96,19 +100,19 @@ TEST(SaxParserTest, ParseBuffer)
     SaxParser obj;
     obj.setDocumentHandler(&handler);
     std::string xml = "<root name='test'><one>two ten\neleven</one><three/></root>";
-    ASSERT_TRUE(obj.parse(xml));
     ASSERT_EQ(handler.d_lineNumber, 0);
     ASSERT_EQ(handler.d_columnNumber, 0);
+    ASSERT_TRUE(obj.parse(xml));
     ASSERT_EQ(3, handler.d_startElements.size());
-    ASSERT_EQ("root", handler.d_startElements[0].first);
-    ASSERT_EQ("name", handler.d_startElements[0].second[0].first);
-    ASSERT_EQ("test", handler.d_startElements[0].second[0].second);
-    ASSERT_EQ("one", handler.d_startElements[1].first);
+    ASSERT_EQ("root", std::get<0>(handler.d_startElements[0]));
+    ASSERT_EQ("name", std::get<1>(handler.d_startElements[0])[0].first);
+    ASSERT_EQ("test", std::get<1>(handler.d_startElements[0])[0].second);
+    ASSERT_EQ("one", std::get<0>(handler.d_startElements[1]));
     ASSERT_EQ(3, handler.d_text.size());
     ASSERT_EQ("two ten", handler.d_text[0]);
     ASSERT_EQ("\n", handler.d_text[1]);
     ASSERT_EQ("eleven", handler.d_text[2]);
-    ASSERT_EQ("three", handler.d_startElements[2].first);
+    ASSERT_EQ("three", std::get<0>(handler.d_startElements[2]));
     ASSERT_EQ(3, handler.d_endElements.size());
     ASSERT_EQ("one", handler.d_endElements[0]);
     ASSERT_EQ("three", handler.d_endElements[1]);
