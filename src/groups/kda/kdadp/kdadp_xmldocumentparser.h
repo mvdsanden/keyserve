@@ -2,6 +2,7 @@
 #ifndef INCLUDED_KDADP_XMLDOCUMENTPARSER
 #define INCLUDED_KDADP_XMLDOCUMENTPARSER
 
+#include <string>
 #include <iosfwd>
 
 namespace MvdS {
@@ -33,9 +34,9 @@ public:
   // ...
 
   // MANIPULATORS
-  bool parse(kdadm::Document *document, std::istream& stream);
-  // Parse the specified 'stream' into the specified 'document'. Return 'true'
-  // on success.
+  bool parse(kdadm::Document *document, std::istream& stream, const std::string& sourceName = "");
+  // Parse the specified 'stream' into the specified 'document'. Optionally use
+  // the specified 'sourceName'. Return 'true' on success.
 
   // ACCESSORS
 };

@@ -18,8 +18,10 @@ struct SaxDocumentHandler
   typedef std::pair<std::string, std::string> Attribute;
   typedef gsl::span<Attribute>                Attributes;
 
-  virtual void location(size_t lineNumber, size_t columnNumber) = 0;
-  
+  virtual void location(const std::shared_ptr<std::string> &sourceName,
+                        size_t                              lineNumber,
+                        size_t                              columnNumber) = 0;
+
   virtual void startDocument() = 0;
   // Called at the start of a document.
 
@@ -58,12 +60,16 @@ public:
   // MANIPULATORS
   virtual void setDocumentHandler(SaxDocumentHandler *documentHandler) = 0;
   // Set the specified 'documentHandler' to be used for parsing.
-  
-  virtual bool parse(const gsl::span<char>& data) = 0;
-  // Parse the specified 'data'. Return 'true' on success.
-  
-  virtual bool parse(std::istream& stream) = 0;
-  // Parse the specified 'stream'. Return 'true' on success.
+
+  virtual bool parse(const gsl::span<char> &data,
+                     const std::string &    sourceName = "") = 0;
+  // Parse the specified 'data'. Optionally set the specified 'sourceName'.
+  // Return 'true' on success.
+
+  virtual bool parse(std::istream &     stream,
+                     const std::string &sourceName = "") = 0;
+  // Parse the specified 'stream'. Optionally set the specified
+  // 'sourceName'.Return 'true' on success.
 
   // ACCESSORS
 };

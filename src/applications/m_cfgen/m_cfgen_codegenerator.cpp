@@ -18,9 +18,6 @@ namespace {
 
   };
 
-  // struct ElementTypeParser;
-  // struct ComplexTypeParser;
-
   struct ElementTypeValidator {
 
     Context *d_context;
@@ -31,13 +28,11 @@ namespace {
     
     void operator=(std::shared_ptr<kdadm::Element> element)
     {
-      std::cout << "Element: " << element->tag() << "\n";
-
       auto nameIter = kdadm::ElementUtils::getAttributeByName(
           "name", element->attributes().begin(), element->attributes().end());
 
       if (element->attributes().end() == nameIter) {
-	std::cerr << "Element had no name.\n";
+	std::cerr << element->location() << " element has no name.\n";
 	return;
       }
 
@@ -47,7 +42,7 @@ namespace {
           "type", element->attributes().begin(), element->attributes().end());
 
       if (element->attributes().end() == typeIter) {
-	std::cerr << "Element '" << name << "' has no type.\n";
+	std::cerr << element->location() << " element '" << name << "' has no type.\n";
 	return;
       }
 
@@ -56,7 +51,7 @@ namespace {
       auto actualTypeIter = d_context->d_complexTypes.find(typeName);
 
       if (d_context->d_complexTypes.end() == actualTypeIter) {
-	std::cerr << "Unknown type: " << typeName << "\n";
+	std::cerr << element->location() << "Unknown type: " << typeName << "\n";
 	return;
       }
 
@@ -81,13 +76,11 @@ namespace {
     
     void operator=(std::shared_ptr<kdadm::Element> element)
     {
-      std::cout << "ComplexType: " << element->tag() << "\n";
-
       auto nameIter = kdadm::ElementUtils::getAttributeByName(
           "name", element->attributes().begin(), element->attributes().end());
 
       if (element->attributes().end() == nameIter) {
-	std::cerr << "Complex type had no name.\n";
+	std::cerr << element->location() << " complex type had no name.\n";
 	return;
       }
 
@@ -99,7 +92,7 @@ namespace {
                                                    element->children().end());
 
       if (element->children().end() == sequenceIter) {
-	std::cerr << "Log: no sequence in complex type: " << typeName << "\n";
+	std::cerr << element->location() << " no sequence in complex type: " << typeName << "\n";
 	return;
       }
 
@@ -109,7 +102,7 @@ namespace {
       sequence->getElementsByTagName(elementTypeValidator, "xs:element");
 
       if (d_context->d_complexTypes.find(typeName) != d_context->d_complexTypes.end()) {
-	std::cerr << "Type already defined: " << typeName << "\n";
+	std::cerr << element->location() << " type already defined: " << typeName << "\n";
       }
       
       d_context->d_complexTypes.emplace(typeName, element);
@@ -133,13 +126,11 @@ namespace {
     
     void operator=(std::shared_ptr<kdadm::Element> element)
     {
-      std::cout << "InternalType: " << element->tag() << "\n";
-
       auto nameIter = kdadm::ElementUtils::getAttributeByName(
           "name", element->attributes().begin(), element->attributes().end());
 
       if (element->attributes().end() == nameIter) {
-	std::cerr << "Internal type has no name.\n";
+	std::cerr << element->location() << " internal type has no name.\n";
 	return;
       }
 

@@ -5,6 +5,10 @@
 #include <kdadm_document.h>
 #include <kdadp_xmldocumentparser.h>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/basic_file_sink.h>
+
 #include <iostream>
 #include <memory>
 #include <fstream>
@@ -14,6 +18,24 @@ using namespace MvdS::m_cfgen;
 
 namespace {
 
+  struct Logger {
+
+    std::shared_ptr<spdlog::logger> d_logger;
+    
+    Logger(const CommandlineArgs& arguments)      
+    {
+
+      d_logger = spdlog::basic_logger_mt<spdlog::async_factory>("logger", "cfgen.log");
+      spdlog::set_default_logger(d_logger);
+      spdlog::set_level(spdlog::level::debug);
+    }
+
+    ~Logger()
+    {
+    }
+
+  };
+  
   template <class T, class U>
   std::shared_ptr<U> openStream(const std::string& name, U *defaultStream)
   {
@@ -30,12 +52,15 @@ int main(int argc, char *argv[])
 {
   CommandlineArgs arguments;
   CommandlineArgsUtil::parse(&arguments, {argv, argc});
-
+ 
   if (arguments.printUsage()) {
     CommandlineArgsUtil::printUsage(&std::cout, {argv, argc});
     return 1;
   }
 
+  Logger logger(arguments);
+  spdlog::info("Init: {}", argv[0]);
+  
   kdadm::Document document;
 
   {
@@ -47,7 +72,7 @@ int main(int argc, char *argv[])
       return 2;
     }
 
-    if (!parser.parse(&document, *inputStream.get())) {
+    if (!parser.parse(&document, *inputStream.get(), arguments.input())) {
       return 4;
     }
   }

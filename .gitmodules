@@ -1,3 +1,6 @@
 [submodule "src/thirdparty/GSL"]
 	path = src/thirdparty/GSL
 	url = git@github.com:microsoft/GSL.git
+[submodule "src/thirdparty/spdlog"]
+	path = src/thirdparty/spdlog
+	url = git@github.com:gabime/spdlog.git

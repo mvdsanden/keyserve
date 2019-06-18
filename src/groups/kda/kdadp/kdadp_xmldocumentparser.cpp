@@ -18,11 +18,15 @@ struct Context : public kdadp::SaxDocumentHandler
 {
   std::shared_ptr<kdadm::Element>             d_root;
   std::stack<std::shared_ptr<kdadm::Element>> d_stck;
+  std::shared_ptr<std::string>                d_sourceName;
   size_t                                      d_lineNumber;
   size_t                                      d_columnNumber;
 
-  void location(size_t lineNumber, size_t columnNumber) override
+  void location(const std::shared_ptr<std::string> &sourceName,
+                size_t                              lineNumber,
+                size_t                              columnNumber) override
   {
+    d_sourceName   = sourceName;
     d_lineNumber   = lineNumber;
     d_columnNumber = columnNumber;
   }
@@ -38,6 +42,7 @@ struct Context : public kdadp::SaxDocumentHandler
                                  std::begin(attributes),
                                  std::end(attributes));
 
+    element->location().d_sourceName    = d_sourceName;
     element->location().d_lineNumbers   = {d_lineNumber, d_lineNumber};
     element->location().d_columnNumbers = {d_columnNumber, d_columnNumber};
 
@@ -67,6 +72,7 @@ struct Context : public kdadp::SaxDocumentHandler
     
     std::shared_ptr<kdadm::Element> element = kdadm::Element::createValue(data);
 
+    element->location().d_sourceName    = d_sourceName;
     element->location().d_lineNumbers   = {d_lineNumber, d_lineNumber};
     element->location().d_columnNumbers = {d_columnNumber, d_columnNumber};
 
@@ -99,12 +105,14 @@ struct Context : public kdadp::SaxDocumentHandler
 XmlDocumentParser::XmlDocumentParser() {}
 
 // MANIPULATORS
-bool XmlDocumentParser::parse(kdadm::Document *document, std::istream& stream)
+bool XmlDocumentParser::parse(kdadm::Document *  document,
+                              std::istream &     stream,
+                              const std::string &sourceName)
 {
   Context          context;
   a_xml::SaxParser parser;
   parser.setDocumentHandler(&context);
-  if (!parser.parse(stream)) {
+  if (!parser.parse(stream, sourceName)) {
     return false;
   }
 

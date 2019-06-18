@@ -32,8 +32,9 @@ public:
   typedef std::vector<Attribute>                Attributes;
 
   struct Location {
-    std::pair<size_t, size_t> d_lineNumbers;
-    std::pair<size_t, size_t> d_columnNumbers;
+    std::shared_ptr<std::string> d_sourceName;
+    std::pair<size_t, size_t>    d_lineNumbers;
+    std::pair<size_t, size_t>    d_columnNumbers;
   };
 
 private:
@@ -265,6 +266,15 @@ inline Iter ElementUtils::getAttributeByName(const std::string &name, Iter begin
       begin, end, [name](const auto &e) { return e.first == name; });
 }
 
+inline std::ostream &operator<<(std::ostream& stream, const Element::Location& location)
+{
+  if (location.d_sourceName) {
+    stream << *location.d_sourceName.get() << ":";
+  }
+
+  stream << location.d_lineNumbers.second << ":";
+  return stream;
+}
   
 } // namespace kdadm
 } // namespace MvdS

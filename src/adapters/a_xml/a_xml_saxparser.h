@@ -29,11 +29,13 @@ public:
   void setDocumentHandler(kdadp::SaxDocumentHandler *documentHandler) override;
   // Set the specified 'documentHandler' to be used for parsing.
   
-  virtual bool parse(const gsl::span<char>& data) override;
-  // Parse the specified 'data'. Return 'true' on success.
-  
-  virtual bool parse(std::istream& stream) override;
-  // Parse the specified 'stream'. Return 'true' on success.
+  virtual bool parse(const gsl::span<char>& data, const std::string& sourceName = "") override;
+  // Parse the specified 'data'. Optionally set the specified 'sourceName'.
+  // Return 'true' on success.
+
+  virtual bool parse(std::istream& stream, const std::string& sourceName = "") override;
+  // Parse the specified 'stream'. Optionally set the specified 'sourceName'.
+  // Return 'true' on success.
 
   // ACCESSORS
 };

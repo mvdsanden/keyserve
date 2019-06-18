@@ -18,12 +18,16 @@ struct MockDocumentHandler : public kdadp::SaxDocumentHandler
   std::vector<std::tuple<std::string, size_t, size_t>>        d_text;
   std::vector<std::tuple<std::string, size_t, size_t>>        d_endElements;
   std::vector<std::string>                                    d_comments;
+  std::shared_ptr<std::string>                                d_sourceName;
   size_t                                                      d_lineNumber = 0;
   size_t d_columnNumber                                                    = 0;
 
   // MANIPULATORS
-  void location(size_t lineNumber, size_t columnNumber) override
+  void location(const std::shared_ptr<std::string> &sourceName,
+                size_t                              lineNumber,
+                size_t                              columnNumber) override
   {
+    d_sourceName   = sourceName;
     d_lineNumber   = lineNumber;
     d_columnNumber = columnNumber;
   }

@@ -23,11 +23,13 @@ struct ParserContext
   kdadp::SaxDocumentHandler *                       d_documentHandler;
   std::string                                       d_data;
   std::vector<kdadp::SaxDocumentHandler::Attribute> d_attributes;
+  std::shared_ptr<std::string>                      d_sourceName;
   size_t                                            d_lineNumber   = 0;
   size_t                                            d_columnNumber = 0;
 
-  ParserContext(XML_Parser parser)
-    : d_parser(parser)
+  ParserContext(XML_Parser parser, std::shared_ptr<std::string> sourceName)
+      : d_parser(parser)
+      , d_sourceName(sourceName)
   {}
 
   void updateLocation()
@@ -40,7 +42,7 @@ struct ParserContext
       return;
     }
 
-    d_documentHandler->location(lineNumber, columnNumber);
+    d_documentHandler->location(d_sourceName, lineNumber, columnNumber);
     d_lineNumber   = lineNumber;
     d_columnNumber = columnNumber;
   }
@@ -146,13 +148,13 @@ void SaxParser::setDocumentHandler(kdadp::SaxDocumentHandler *documentHandler)
   d_documentHandler = documentHandler;
 }
 
-bool SaxParser::parse(const gsl::span<char> &data)
+  bool SaxParser::parse(const gsl::span<char> &data, const std::string& sourceName)
 {
   assert(nullptr != d_documentHandler);
 
   XML_Parser parser = XML_ParserCreate(NULL);
   
-  ParserContext context(parser);
+  ParserContext context(parser, std::make_shared<std::string>(sourceName));
   context.d_documentHandler = d_documentHandler;
 
   XML_SetUserData(parser, &context);
@@ -171,13 +173,13 @@ bool SaxParser::parse(const gsl::span<char> &data)
   return true;
 }
 
-bool SaxParser::parse(std::istream &stream)
+bool SaxParser::parse(std::istream &stream, const std::string& sourceName)
 {
   assert(nullptr != d_documentHandler);
 
   XML_Parser parser = XML_ParserCreate(NULL);
   
-  ParserContext context(parser);
+  ParserContext context(parser, std::make_shared<std::string>(sourceName));
   context.d_documentHandler = d_documentHandler;
 
   XML_SetUserData(parser, &context);
