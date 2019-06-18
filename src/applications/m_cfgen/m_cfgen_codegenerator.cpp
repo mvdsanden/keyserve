@@ -59,6 +59,8 @@ namespace {
 	std::cerr << "Unknown type: " << typeName << "\n";
 	return;
       }
+
+      element->children().push_back(actualTypeIter->second);
     }
 
     ElementTypeValidator& operator*() { return *this; }
@@ -109,7 +111,8 @@ namespace {
       if (d_context->d_complexTypes.find(typeName) != d_context->d_complexTypes.end()) {
 	std::cerr << "Type already defined: " << typeName << "\n";
       }
-      d_context->d_complexTypes.insert(std::make_pair(typeName, sequence));
+      
+      d_context->d_complexTypes.emplace(typeName, element);
     }
 
     void operator++()
