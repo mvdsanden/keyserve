@@ -23,8 +23,8 @@ struct ParserContext
   kdadp::SaxDocumentHandler *                       d_documentHandler;
   std::string                                       d_data;
   std::vector<kdadp::SaxDocumentHandler::Attribute> d_attributes;
-  size_t                                            d_lineNumber;
-  size_t                                            d_columnNumber;
+  size_t                                            d_lineNumber   = 0;
+  size_t                                            d_columnNumber = 0;
 
   ParserContext(XML_Parser parser)
     : d_parser(parser)
