@@ -117,7 +117,8 @@ public:
   // Return the element file location.
 
   template <class OutputIt>
-  void getElementsByTagName(OutputIt outputIt, const std::string &tag) const;
+  void getElementsByTagName(const OutputIt &   outputIt,
+                            const std::string &tag) const;
   // Finds all children with the specified 'tag' output those using the
   // specified 'outputIterator'.
 
@@ -229,7 +230,7 @@ inline const Element::Attributes &Element::attributes() const
 inline const Element::Location &Element::location() const { return d_location; }
 
 template <class OutputIt>
-inline void Element::getElementsByTagName(OutputIt           outputIt,
+inline void Element::getElementsByTagName(const OutputIt &   outputIt,
                                           const std::string &tag) const
 {
   std::copy_if(

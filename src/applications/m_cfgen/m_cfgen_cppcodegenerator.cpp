@@ -9,6 +9,8 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <optional>
 
 namespace MvdS {
 namespace m_cfgen {
@@ -16,10 +18,28 @@ namespace m_cfgen {
 namespace {
 
 std::shared_ptr<kdadm::Element>
+tryExtractElement(const std::string &                    name,
+               const std::shared_ptr<kdadm::Element> &element)
+{
+  auto iter = kdadm::ElementUtils::getElementByTagName(
+      name, element->children().begin(), element->children().end());
+  return (element->children().end() != iter?*iter:nullptr);
+}
+  
+std::shared_ptr<kdadm::Element>
+extractElement(const std::string &                    name,
+               const std::shared_ptr<kdadm::Element> &element)
+{
+  auto result = tryExtractElement(name, element);
+  assert(result);
+  return result;
+}
+  
+std::shared_ptr<kdadm::Element>
 cppFromInternal(const std::shared_ptr<kdadm::Element> &typeElement)
 {
   auto cppIter = kdadm::ElementUtils::getElementByTagName(
-      "cpp", typeElement->children().begin(), typeElement->children().end());
+      "xs:cpp", typeElement->children().begin(), typeElement->children().end());
   return (cppIter != typeElement->children().end()?*cppIter:nullptr);
 }
 
@@ -39,6 +59,15 @@ bool cppTypeName(std::string *                          typeName,
   return true;
 }
 
+std::optional<std::string>
+tryExtractAttribute(const std::string &                    name,
+                    const std::shared_ptr<kdadm::Element> &element)
+{
+  auto iter = kdadm::ElementUtils::getAttributeByName(
+      name, element->attributes().begin(), element->attributes().end());
+  return (element->attributes().end() != iter ? iter->second : nullptr);
+}
+  
 std::string extractAttribute(const std::string &                    name,
                              const std::shared_ptr<kdadm::Element> &element)
 {
@@ -47,16 +76,6 @@ std::string extractAttribute(const std::string &                    name,
   assert(element->attributes().end() != iter);
   return iter->second;
 }
-
-std::shared_ptr<kdadm::Element>
-extractElement(const std::string &                    name,
-               const std::shared_ptr<kdadm::Element> &element)
-{
-  auto iter = kdadm::ElementUtils::getElementByTagName(
-      name, element->children().begin(), element->children().end());
-  assert(element->children().end() != iter);
-  return *iter;
-  }
 
 void extractOccurs(size_t *                               minOccurs,
                    size_t *                               maxOccurs,
@@ -283,6 +302,52 @@ struct Context
   std::string                     d_ns;
   std::string                     d_name;
 
+  // ------------------------
+  // Struct IncludesGenerator
+  // ------------------------
+  struct IncludesGenerator
+  {
+    // PUBLIC DATA
+    std::ostream &        d_stream;
+    Context *             d_context;
+    std::set<std::string> d_includes;
+
+    // CREATORS
+    IncludesGenerator(std::ostream &stream, Context *context)
+        : d_stream(stream)
+        , d_context(context)
+    {
+    }
+
+    ~IncludesGenerator()
+    {
+      for (const auto& include : d_includes) {
+	d_stream << "#include <" << include << ">\n";
+      }
+      d_stream << "\n";
+    }
+    
+    // MANIPULATORS
+    IncludesGenerator &operator*() { return *this; }
+    void operator++() {}
+
+    void operator=(std::shared_ptr<kdadm::Element> element)
+    {
+      auto cpp = cppFromInternal(element);
+      if (!cpp) {
+        return;
+      }
+
+      auto include = tryExtractAttribute("include", cpp);
+      if (!include) {
+	return;
+      }
+
+      d_includes.emplace(*include);
+    }
+  };
+
+  
   // ----------------------------------
   // Struct VariableDefinitionGenerator
   // ----------------------------------
@@ -417,6 +482,8 @@ struct Context
                << className << "& obj)\n{\n";
     }
 
+    StreamSpecificationGenerator(const StreamSpecificationGenerator&) = delete;
+    
     ~StreamSpecificationGenerator()
     {
       d_stream << "  return true;\n}\n";
@@ -498,10 +565,10 @@ struct Context
       
       d_stream << "}; // class " << name << "\n\n";
 
-      d_stream << "// --- inline methods ---\n"
-	       << "// " << std::string(name.size() + 6) << "\n"
+      d_stream << "// --- inline methods ---\n\n"
+	       << "// " << std::string(name.size() + 6, '-') << "\n"
 	       << "// Class " << name << "\n"
-	       << "// " << std::string(name.size() + 6) << "\n\n";
+	       << "// " << std::string(name.size() + 6, '-') << "\n\n";
 
       StreamSpecificationGenerator streamSpecificationGenerator(
           d_stream, d_context, name);
@@ -519,7 +586,7 @@ struct Context
   void beginNamespaces(std::ostream &stream)
   {
     stream << "namespace " << d_enterpriseNs << " {\n";
-    stream << "namespace " << d_ns << " {\n";
+    stream << "namespace " << d_ns << " {\n\n";
   }
 
   void endNamespaces(std::ostream &stream)
@@ -546,12 +613,19 @@ struct Context
 
       beginDocument(stream, filename);
 
+      IncludesGenerator includesGenerator(stream, this);
+      d_root->getElementsByTagName(includesGenerator, "xs:internalType");
+      
       beginNamespaces(stream);
 
       TypeDefinitionGenerator typeGenerator(stream, this);
       d_root->getElementsByTagName(typeGenerator, "xs:complexType");
 
       endNamespaces(stream);
+
+      if (!stream) {
+	return false;
+      }
     }
 
     // { // Source
@@ -572,7 +646,7 @@ struct Context
     //   endNamespaces(stream);
     // }
     
-    return static_cast<bool>(stream);
+    return true;
   }
 };
 }; // anonymous namespace
