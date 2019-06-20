@@ -194,21 +194,98 @@ bool generateStreamSpecification(
   }
 
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
-
+  stream << type << "& " << name << "()\n";
+  
   // TODO: implement!
+
+  stream << "{\n";
+
+  
+
+  stream << "}\n";
 
   return true;
 }
 
-  
-struct Context
+void generateStreamParseManditory(std::ostream &     stream,
+                                  const std::string &name,
+                                  const std::string &type)
 {
 
+  stream << "  { // BEGIN " << name << "\n"
+         << "    auto iter = ElementUtils::getElementByTagName(\n"
+         << "      \"" << name << "\",\n"
+         << "      element->children().begin(),\n"
+         << "      element->children().end());\n\n"
+         << "    if (iter == element->children().end()) {\n"
+	 << "      spdlog::error(\"{}: expected element '{}'\",\n"
+	 << "        element.location(), \"" << name << "\");\n"
+	 << "      return false;\n"
+	 << "    }\n\n"
+	 << "    if (!(element >> d_" << name << ")) {\n"
+	 << "      return false;\n"
+	 << "    }\n"
+	 << "  } // END " << name << "\n\n";
+}
+
+void generateStreamParseVector(std::ostream &     stream,
+                               const std::string &name,
+                               const std::string &type,
+                               size_t             minOccurs)
+{
+
+  stream << "  { // BEGIN " << name << "\n"
+         << "    bool success = true;\n"
+         << "    element->getElementsByTagName(\n"
+         << "      \"" << name << "\",\n"
+         << "      [this, &success](const auto& e){\n"
+         << "        success = success && (e >> d_" << name
+         << ".emplace_back());\n"
+         << "      });\n\n"
+         << "    if (!success) {\n"
+         << "      return false;\n"
+         << "    }\n\n"
+         << "    if (" << minOccurs << " > d_" << name << ".size()) {\n"
+         << "      spdlog::error(\"{}: expected at least " << minOccurs
+         << " elements with name {}\",\n"
+         << "        element.location(), " << name << ");\n"
+         << "    }\n"
+         << "  } // END " << name << "\n\n";
+}
+
+void generateStreamParseOptional(std::ostream &     stream,
+                                 const std::string &name,
+                                 const std::string &type)
+{
+
+  stream << "  { // BEGIN " << name << "\n"
+         << "    auto iter = ElementUtils::getElementByTagName(\n"
+         << "      \"" << name << "\",\n"
+         << "      element->children().begin(),\n"
+         << "      element->children().end());\n\n"
+         << "    if (iter == element->children().end()) {\n"
+	 << "      return true;\n"
+	 << "    }\n\n"
+	 << "    if (!(element >> d_" << name << ".emplace())) {\n"
+	 << "      return false;\n"
+	 << "    }\n"
+	 << "  } // END " << name << "\n\n";
+}
+
+// --------------
+// Struct Context
+// --------------
+struct Context
+{
+  // DATA
   std::shared_ptr<kdadm::Element> d_root;
   std::string                     d_enterpriseNs;
   std::string                     d_ns;
   std::string                     d_name;
 
+  // ----------------------------------
+  // Struct VariableDefinitionGenerator
+  // ----------------------------------
   struct VariableDefinitionGenerator
   {
     // PUBLIC DATA
@@ -225,7 +302,6 @@ struct Context
 
     // MANIPULATORS
     VariableDefinitionGenerator &operator*() { return *this; }
-
     void operator++() {}
 
     void operator=(std::shared_ptr<kdadm::Element> element)
@@ -245,6 +321,9 @@ struct Context
     }
   };
 
+  // ----------------------------------
+  // Struct AccessorDefinitionGenerator
+  // ----------------------------------
   struct AccessorDefinitionGenerator
   {
     // PUBLIC DATA
@@ -261,7 +340,6 @@ struct Context
 
     // MANIPULATORS
     AccessorDefinitionGenerator &operator*() { return *this; }
-
     void operator++() {}
 
     void operator=(std::shared_ptr<kdadm::Element> element)
@@ -281,6 +359,9 @@ struct Context
     }
   };
 
+  // -------------------------------------
+  // Struct ManipulatorDefinitionGenerator
+  // -------------------------------------
   struct ManipulatorDefinitionGenerator
   {
     // PUBLIC DATA
@@ -297,7 +378,6 @@ struct Context
 
     // MANIPULATORS
     ManipulatorDefinitionGenerator &operator*() { return *this; }
-
     void operator++() {}
 
     void operator=(std::shared_ptr<kdadm::Element> element)
@@ -317,6 +397,9 @@ struct Context
     }
   };
 
+  // -----------------------------------
+  // Struct StreamSpecificationGenerator
+  // -----------------------------------
   struct StreamSpecificationGenerator
   {
     // PUBLIC DATA
@@ -330,20 +413,19 @@ struct Context
         : d_stream(stream)
         , d_context(context)
     {
-      d_stream << "inline void operator>>(const kdadm::Element &element, "
+      d_stream << "inline bool operator>>(const kdadm::Element &element, "
                << className << "& obj)\n{\n";
     }
 
     ~StreamSpecificationGenerator()
     {
-      d_stream << "}\n";
+      d_stream << "  return true;\n}\n";
     }
     
     // MANIPULATORS
     StreamSpecificationGenerator &operator*() { return *this; }
-
     void operator++() {}
-
+    
     void operator=(std::shared_ptr<kdadm::Element> element)
     {
       std::string name = extractAttribute("name", element);
@@ -356,12 +438,22 @@ struct Context
       
       assert(1 == element->children().size());
 
-      generateStreamSpecification(
-          d_stream, type, name, minOccurs, maxOccurs, element->children()[0]);
+      // generateStreamSpecification(
+      //     d_stream, type, name, minOccurs, maxOccurs, element->children()[0]);
+
+      if (1 == maxOccurs && 1 == minOccurs) {
+	generateStreamParseManditory(d_stream, name, type);
+      } else if (1 < maxOccurs) {
+	generateStreamParseVector(d_stream, name, type, minOccurs);
+      } else {
+	generateStreamParseOptional(d_stream, name, type);
+      }
     }
   };
 
-  
+  // ------------------------------
+  // Struct TypeDefinitionGenerator
+  // ------------------------------
   struct TypeDefinitionGenerator
   {
     // PUBLIC DATA
@@ -404,16 +496,17 @@ struct Context
                                                               d_context);
       sequence->getElementsByTagName(accessorDefinitionGenerator, "xs:element");
       
-      d_stream << "}; // class " << name << "\n";
+      d_stream << "}; // class " << name << "\n\n";
 
-      d_stream << "// --- inline methods ---\n";
+      d_stream << "// --- inline methods ---\n"
+	       << "// " << std::string(name.size() + 6) << "\n"
+	       << "// Class " << name << "\n"
+	       << "// " << std::string(name.size() + 6) << "\n\n";
 
       StreamSpecificationGenerator streamSpecificationGenerator(
           d_stream, d_context, name);
       sequence->getElementsByTagName(streamSpecificationGenerator,
                                      "xs:element");
-
-      
     }
   };
 
@@ -443,23 +536,42 @@ struct Context
     std::transform(lcNs.begin(), lcNs.end(), lcNs.begin(), ::tolower);
     std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
 
-    std::string filename = lcNs + "_" + lcName + ".h";
+    { // Header
+      std::string   filename = lcNs + "_" + lcName + ".h";
+      std::ofstream stream(filename);
+      if (!stream) {
+        std::cerr << "Error opening header file: '" << filename << "'.\n";
+        return false;
+      }
 
-    std::ofstream stream(filename);
-    if (!stream) {
-      std::cerr << "Error opening header file: '" << filename << "'.\n";
-      return false;
+      beginDocument(stream, filename);
+
+      beginNamespaces(stream);
+
+      TypeDefinitionGenerator typeGenerator(stream, this);
+      d_root->getElementsByTagName(typeGenerator, "xs:complexType");
+
+      endNamespaces(stream);
     }
 
-    beginDocument(stream, filename);
+    // { // Source
+    //   std::string   filename = lcNs + "_" + lcName + ".cpp";
+    //   std::ofstream stream(filename);
+    //   if (!stream) {
+    //     std::cerr << "Error opening header file: '" << filename << "'.\n";
+    //     return false;
+    //   }
 
-    beginNamespaces(stream);
+    //   beginDocument(stream, filename);
 
-    TypeDefinitionGenerator typeGenerator(stream, this);
-    d_root->getElementsByTagName(typeGenerator, "xs:complexType");
+    //   beginNamespaces(stream);
 
-    endNamespaces(stream);
+    //   TypeSpecificationGenerator typeGenerator(stream, this);
+    //   d_root->getElementsByTagName(typeGenerator, "xs:complexType");
 
+    //   endNamespaces(stream);
+    // }
+    
     return static_cast<bool>(stream);
   }
 };
