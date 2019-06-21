@@ -131,6 +131,41 @@ TEST(ElementTest, getFirstAttributeByName)
   ASSERT_EQ(iter->second, "2");
 }
 
+TEST(ElementTest, StreamConversion)
+{
+  // TEST STREAM CONVERSION
+  {
+    std::string result;
+    std::unique_ptr<Element> obj = Element::createValue("test");
+    *obj.get() >> result;
+    ASSERT_EQ(result, "test");
+  }
+  {
+    size_t result;
+    std::unique_ptr<Element> obj = Element::createValue("123456789");
+    *obj.get() >> result;
+    ASSERT_EQ(result, 123456789);
+  }
+  {
+    int result;
+    std::unique_ptr<Element> obj = Element::createValue("123456789");
+    *obj.get() >> result;
+    ASSERT_EQ(result, 123456789);
+  }
+  {
+    float result;
+    std::unique_ptr<Element> obj = Element::createValue("0.1234567");
+    *obj.get() >> result;
+    ASSERT_EQ(result, 0.1234567);
+  }    
+  {
+    double result;
+    std::unique_ptr<Element> obj = Element::createValue("0.123456789");
+    *obj.get() >> result;
+    ASSERT_EQ(result, 0.123456789);
+  }
+}
+
 TEST(ElementUtilsTest, getElementByTagName)
 {
   // TEST GET ELEMENT BY TAG NAME

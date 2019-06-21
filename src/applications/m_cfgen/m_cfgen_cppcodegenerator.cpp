@@ -317,6 +317,10 @@ struct Context
         : d_stream(stream)
         , d_context(context)
     {
+      d_includes.emplace("spdlog/spdlog.h");
+      d_includes.emplace("vector");
+      d_includes.emplace("optional");
+      d_includes.emplace("kdadm_element.h");
     }
 
     ~IncludesGenerator()
@@ -328,10 +332,7 @@ struct Context
     }
     
     // MANIPULATORS
-    IncludesGenerator &operator*() { return *this; }
-    void operator++() {}
-
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       auto cpp = cppFromInternal(element);
       if (!cpp) {
@@ -366,10 +367,7 @@ struct Context
     }
 
     // MANIPULATORS
-    VariableDefinitionGenerator &operator*() { return *this; }
-    void operator++() {}
-
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       std::string name = extractAttribute("name", element);
       std::string type = extractAttribute("type", element);
@@ -404,10 +402,7 @@ struct Context
     }
 
     // MANIPULATORS
-    AccessorDefinitionGenerator &operator*() { return *this; }
-    void operator++() {}
-
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       std::string name = extractAttribute("name", element);
       std::string type = extractAttribute("type", element);
@@ -442,10 +437,7 @@ struct Context
     }
 
     // MANIPULATORS
-    ManipulatorDefinitionGenerator &operator*() { return *this; }
-    void operator++() {}
-
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       std::string name = extractAttribute("name", element);
       std::string type = extractAttribute("type", element);
@@ -490,10 +482,7 @@ struct Context
     }
     
     // MANIPULATORS
-    StreamSpecificationGenerator &operator*() { return *this; }
-    void operator++() {}
-    
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       std::string name = extractAttribute("name", element);
       std::string type = extractAttribute("type", element);
@@ -534,11 +523,7 @@ struct Context
     {}
 
     // MANIPULATORS
-    TypeDefinitionGenerator &operator*() { return *this; }
-
-    void operator++() {}
-
-    void operator=(std::shared_ptr<kdadm::Element> element)
+    void operator()(std::shared_ptr<kdadm::Element> element)
     {
       std::string name     = extractAttribute("name", element);
       auto        sequence = extractElement("xs:sequence", element);
@@ -549,20 +534,22 @@ struct Context
 
       VariableDefinitionGenerator variableDefinitionGenerator(d_stream,
                                                               d_context);
-      sequence->getElementsByTagName(variableDefinitionGenerator, "xs:element");
+      sequence->getElementsByTagName("xs:element",
+                                     std::ref(variableDefinitionGenerator));
 
       d_stream << "public:\n"
 	       << "// CREATORS\n";
 
       ManipulatorDefinitionGenerator manipulatorDefinitionGenerator(d_stream,
                                                                     d_context);
-      sequence->getElementsByTagName(manipulatorDefinitionGenerator, "xs:element");
-
+      sequence->getElementsByTagName("xs:element",
+                                     std::ref(manipulatorDefinitionGenerator));
 
       AccessorDefinitionGenerator accessorDefinitionGenerator(d_stream,
                                                               d_context);
-      sequence->getElementsByTagName(accessorDefinitionGenerator, "xs:element");
-      
+      sequence->getElementsByTagName("xs:element",
+                                     std::ref(accessorDefinitionGenerator));
+
       d_stream << "}; // class " << name << "\n\n";
 
       d_stream << "// --- inline methods ---\n\n"
@@ -572,8 +559,8 @@ struct Context
 
       StreamSpecificationGenerator streamSpecificationGenerator(
           d_stream, d_context, name);
-      sequence->getElementsByTagName(streamSpecificationGenerator,
-                                     "xs:element");
+      sequence->getElementsByTagName("xs:element",
+                                     std::ref(streamSpecificationGenerator));
     }
   };
 
@@ -613,13 +600,17 @@ struct Context
 
       beginDocument(stream, filename);
 
-      IncludesGenerator includesGenerator(stream, this);
-      d_root->getElementsByTagName(includesGenerator, "xs:internalType");
+      {
+	IncludesGenerator includesGenerator(stream, this);
+	d_root->getElementsByTagName("xs:internalType", std::ref(includesGenerator));
+      }
       
       beginNamespaces(stream);
 
-      TypeDefinitionGenerator typeGenerator(stream, this);
-      d_root->getElementsByTagName(typeGenerator, "xs:complexType");
+      {
+	TypeDefinitionGenerator typeGenerator(stream, this);
+	d_root->getElementsByTagName("xs:complexType", std::ref(typeGenerator));
+      }
 
       endNamespaces(stream);
 
@@ -641,7 +632,7 @@ struct Context
     //   beginNamespaces(stream);
 
     //   TypeSpecificationGenerator typeGenerator(stream, this);
-    //   d_root->getElementsByTagName(typeGenerator, "xs:complexType");
+    //   d_root->getElementsByTagName("xs:complexType", std::ref(typeGenerator));
 
     //   endNamespaces(stream);
     // }

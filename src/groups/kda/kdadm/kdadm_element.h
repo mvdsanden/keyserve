@@ -4,11 +4,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <charconv>
+#include <functional>
+#include <gsl/span>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include <gsl/span>
 
 namespace MvdS {
 namespace kdadm {
@@ -27,9 +28,10 @@ class Element
 
 public:
   // PUBLIC TYPES
-  typedef std::vector<std::shared_ptr<Element>> Elements;
-  typedef std::pair<std::string, std::string>   Attribute;
-  typedef std::vector<Attribute>                Attributes;
+  typedef std::shared_ptr<Element>            ElementSP;
+  typedef std::vector<ElementSP>              Elements;
+  typedef std::pair<std::string, std::string> Attribute;
+  typedef std::vector<Attribute>              Attributes;
 
   struct Location {
     std::shared_ptr<std::string> d_sourceName;
@@ -121,6 +123,12 @@ public:
                             const std::string &tag) const;
   // Finds all children with the specified 'tag' output those using the
   // specified 'outputIterator'.
+
+  void getElementsByTagName(
+      const std::string &                           tag,
+      const std::function<void(const ElementSP &)> &pred) const;
+  // Finds all children with the specified 'tag' output those by invoking the
+  // specified 'pred'.
 
   Attributes::const_iterator
   getFirstAttributeByName(const std::string &name) const;
@@ -240,6 +248,18 @@ inline void Element::getElementsByTagName(const OutputIt &   outputIt,
       [tag](const auto &e) { return e->isElementType() && tag == e->tag(); });
 }
 
+inline void
+Element::getElementsByTagName(const std::string &                    tag,
+                              const std::function<void(const ElementSP &)> &pred) const
+{
+  for (const auto &child : d_children) {
+    if (!child->isElementType() || tag != child->tag()) {
+      continue;
+    }
+    pred(child);
+  }
+}
+
 inline Element::Attributes::const_iterator
 Element::getFirstAttributeByName(const std::string &name) const
 {
@@ -276,7 +296,55 @@ inline std::ostream &operator<<(std::ostream& stream, const Element::Location& l
   stream << location.d_lineNumbers.second << ":";
   return stream;
 }
-  
+
+inline bool operator>>(const Element& element, std::string& str)
+{
+  if (!element.isValueType()) {
+    return false;
+  }
+
+  str = element.value();
+  return true;
+}
+
+inline bool operator>>(const Element& element, float& result)
+{
+  if (!element.isValueType()) {
+    return false;
+  }
+
+  result = std::atof(element.value().c_str());
+  return true;
+}
+
+inline bool operator>>(const Element& element, double& result)
+{
+  if (!element.isValueType()) {
+    return false;
+  }
+
+  result = std::atof(element.value().c_str());
+  return true;
+}
+
+template <class Type>
+inline bool operator>>(const Element& element, Type& result)
+{
+  if (!element.isValueType()) {
+    return false;
+  }
+
+  if (auto [p, ec] =
+          std::from_chars(element.value().c_str(),
+                          element.value().c_str() + element.value().size(),
+                          result);
+      ec != std::errc()) {
+    return false;
+  }
+  return true;
+}
+
+
 } // namespace kdadm
 } // namespace MvdS
 
