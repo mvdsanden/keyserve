@@ -57,18 +57,18 @@ TEST(CommandlineArgsTest, parseInput) {
   }
 }
 
-TEST(CommandlineArgsTest, parseOutput) {
+TEST(CommandlineArgsTest, parseOutputPath) {
   // TEST INPUT ARGUMENT
   {
     CommandlineArgs obj;
-    CommandlineArgsUtil::parse(&obj, to_args("--output", "test"));
-    ASSERT_EQ("test", obj.output());
+    CommandlineArgsUtil::parse(&obj, to_args("--outputPath", "test"));
+    ASSERT_EQ("test", obj.outputPath());
   }
 
   {
     CommandlineArgs obj;
     CommandlineArgsUtil::parse(&obj, to_args("-o", "test"));
-    ASSERT_EQ("test", obj.output());
+    ASSERT_EQ("test", obj.outputPath());
   }
 }
 

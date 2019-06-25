@@ -66,13 +66,13 @@ class ArgumentTable
     return 2; // parsed two elements from 'args'.
   }
 
-  static size_t parseOutput(CommandlineArgs *            obj,
+  static size_t parseOutputPath(CommandlineArgs *            obj,
                             gsl::span<const char *const> args)
   {
     if (2 > args.size()) {
       return 0;
     }
-    obj->output() = args[1];
+    obj->outputPath() = args[1];
     return 2; // parsed two elements from 'args'.
   }
 
@@ -102,7 +102,7 @@ public:
   ArgumentTable()
   {
     append("--input", "-i", parseInput, "Input filename or '-' for standard in.");
-    append("--output", "-o", parseOutput, "Output filename of '-' for standard out.");
+    append("--outputPath", "-o", parseOutputPath, "Output path; this is where files are generated.");
     append("--language", "-l", parseLanguage, "Language to use (default: c++).");
     append("--help", "-h", parseHelp, "Print usage information");
   }
@@ -179,7 +179,7 @@ CommandlineArgs::Strings &CommandlineArgs::positional() { return d_positional; }
 
 std::string &CommandlineArgs::input() { return d_input; }
 
-std::string &CommandlineArgs::output() { return d_output; }
+std::string &CommandlineArgs::outputPath() { return d_outputPath; }
 
 std::string &CommandlineArgs::language() { return d_language; }
   
@@ -193,7 +193,7 @@ const CommandlineArgs::Strings &CommandlineArgs::positional() const
 
 const std::string &CommandlineArgs::input() const { return d_input; }
 
-const std::string &CommandlineArgs::output() const { return d_output; }
+const std::string &CommandlineArgs::outputPath() const { return d_outputPath; }
 
 const std::string &CommandlineArgs::language() const { return d_language; }
   

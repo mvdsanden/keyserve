@@ -14,7 +14,7 @@ class CommandlineArgs;
 // Class: CppCodeGenerator
 // =======================
 
-  class CppCodeGenerator : public CodeGenerator
+class CppCodeGenerator : public CodeGenerator
 {
   // ...
 

@@ -28,7 +28,7 @@ private:
   // DATA
   Strings     d_positional;
   std::string d_input;
-  std::string d_output;
+  std::string d_outputPath;
   std::string d_language = "c++";
   bool        d_printUsage = false;
 
@@ -47,8 +47,8 @@ public:
   std::string &input();
   // Return input filename.
 
-  std::string &output();
-  // Return output filename.
+  std::string &outputPath();
+  // Return output path.
 
   std::string &language();
   // Return output language.
@@ -63,8 +63,8 @@ public:
   const std::string &input() const;
   // Return input filename.
 
-  const std::string &output() const;
-  // Return output filename.
+  const std::string &outputPath() const;
+  // Return output path.
 
   const std::string &language() const;
   // Return output language.
