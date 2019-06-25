@@ -287,30 +287,26 @@ inline Iter ElementUtils::getAttributeByName(const std::string &name, Iter begin
       begin, end, [name](const auto &e) { return e.first == name; });
 }
 
-inline std::ostream &operator<<(std::ostream& stream, const Element::Location& location)
-{
-  if (location.d_sourceName) {
-    stream << *location.d_sourceName.get() << ":";
-  }
-
-  stream << location.d_lineNumbers.second << ":";
-  return stream;
-}
-
-inline bool operator>>(const Element& element, std::string& str)
+inline bool operator>>(const Element& element, std::string& result)
 {
   if (!element.isValueType()) {
-    return false;
+    if (element.children().empty()) {    
+      return false;
+    }
+    return *element.children().front() >> result;
   }
 
-  str = element.value();
+  result = element.value();
   return true;
 }
 
 inline bool operator>>(const Element& element, float& result)
 {
   if (!element.isValueType()) {
-    return false;
+    if (element.children().empty()) {    
+      return false;
+    }
+    return *element.children().front() >> result;
   }
 
   result = std::atof(element.value().c_str());
@@ -320,7 +316,10 @@ inline bool operator>>(const Element& element, float& result)
 inline bool operator>>(const Element& element, double& result)
 {
   if (!element.isValueType()) {
-    return false;
+    if (element.children().empty()) {    
+      return false;
+    }
+    return *element.children().front() >> result;
   }
 
   result = std::atof(element.value().c_str());
@@ -330,7 +329,10 @@ inline bool operator>>(const Element& element, double& result)
 inline bool operator>>(const Element& element, bool& result)
 {
   if (!element.isValueType()) {
-    return false;
+    if (element.children().empty()) {    
+      return false;
+    }
+    return *element.children().front() >> result;
   }
 
   result = "true" == element.value() || "1" == element.value();
@@ -341,7 +343,10 @@ template <class Type>
 inline bool operator>>(const Element& element, Type& result)
 {
   if (!element.isValueType()) {
-    return false;
+    if (element.children().empty()) {    
+      return false;
+    }
+    return *element.children().front() >> result;
   }
 
   if (auto [p, ec] =
@@ -357,6 +362,17 @@ inline bool operator>>(const Element& element, Type& result)
 
 } // namespace kdadm
 } // namespace MvdS
+
+template <class OStream>
+inline OStream &operator<<(OStream& stream, const MvdS::kdadm::Element::Location& location)
+{
+  if (location.d_sourceName) {
+    stream << *location.d_sourceName.get() << ":";
+  }
+
+  stream << location.d_lineNumbers.second << ":";
+  return stream;
+}
 
 #endif // INCLUDED_KDADM_ELEMENT
 

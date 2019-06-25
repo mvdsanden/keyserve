@@ -1,0 +1,12 @@
+<note>
+
+  <to>A. Name</to>
+  <from>Some O. Name</from>
+  <heading>This is a test...</heading>
+  <body>
+    Lets type some text.
+  </body>
+  <body><scan>Can we have some more body?</scan></body>
+
+  
+</note>

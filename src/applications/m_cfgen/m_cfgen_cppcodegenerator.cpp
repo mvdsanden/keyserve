@@ -191,7 +191,7 @@ bool generateAccessorDefinition(
 {
   type = internalTypeName(typeElement).value_or(type);
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);  
-  stream << "const " << type << "& " << name << "() const;\n";
+  stream << "const " << type << "& " << name << "() const { return d_" << name << ";}\n";
   return true;
 }
 
@@ -208,7 +208,7 @@ bool generateManipulatorDefinition(
 {
   type = internalTypeName(typeElement).value_or(type);
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);  
-  stream << type << "& " << name << "();\n";
+  stream << type << "& " << name << "() { return d_" << name << ";}\n";
   return true;
 }
 
@@ -219,16 +219,16 @@ void generateStreamParseManditory(std::ostream &     stream,
 // and the specified 'type' to the specified 'stream'.
 {
   stream << "  { // BEGIN " << name << "\n"
-         << "    auto iter = ElementUtils::getElementByTagName(\n"
+         << "    auto iter = kdadm::ElementUtils::getElementByTagName(\n"
          << "      \"" << name << "\",\n"
-         << "      element->children().begin(),\n"
-         << "      element->children().end());\n\n"
-         << "    if (iter == element->children().end()) {\n"
+         << "      element.children().begin(),\n"
+         << "      element.children().end());\n\n"
+         << "    if (iter == element.children().end()) {\n"
 	 << "      spdlog::error(\"{}: expected element '{}'\",\n"
 	 << "        element.location(), \"" << name << "\");\n"
 	 << "      return false;\n"
 	 << "    }\n\n"
-	 << "    if (!(element >> d_" << name << ")) {\n"
+	 << "    if (!(**iter >> obj." << name << "())) {\n"
 	 << "      return false;\n"
 	 << "    }\n"
 	 << "  } // END " << name << "\n\n";
@@ -244,19 +244,19 @@ void generateStreamParseVector(std::ostream &     stream,
 
   stream << "  { // BEGIN " << name << "\n"
          << "    bool success = true;\n"
-         << "    element->getElementsByTagName(\n"
+         << "    element.getElementsByTagName(\n"
          << "      \"" << name << "\",\n"
-         << "      [this, &success](const auto& e){\n"
-         << "        success = success && (e >> d_" << name
-         << ".emplace_back());\n"
+         << "      [&obj, &success](const auto& e){\n"
+         << "        success = success && (*e >> obj." << name
+         << "().emplace_back());\n"
          << "      });\n\n"
          << "    if (!success) {\n"
          << "      return false;\n"
          << "    }\n\n"
-         << "    if (" << minOccurs << " > d_" << name << ".size()) {\n"
+         << "    if (" << minOccurs << " > obj." << name << "().size()) {\n"
          << "      spdlog::error(\"{}: expected at least " << minOccurs
-         << " elements with name {}\",\n"
-         << "        element.location(), " << name << ");\n"
+         << " elements with name '" << name <<"'\",\n"
+         << "        element.location());\n"
          << "    }\n"
          << "  } // END " << name << "\n\n";
 }
@@ -269,14 +269,14 @@ void generateStreamParseOptional(std::ostream &     stream,
 {
 
   stream << "  { // BEGIN " << name << "\n"
-         << "    auto iter = ElementUtils::getElementByTagName(\n"
+         << "    auto iter = kdadm::ElementUtils::getElementByTagName(\n"
          << "      \"" << name << "\",\n"
-         << "      element->children().begin(),\n"
-         << "      element->children().end());\n\n"
-         << "    if (iter == element->children().end()) {\n"
+         << "      element.children().begin(),\n"
+         << "      element.children().end());\n\n"
+         << "    if (iter == element.children().end()) {\n"
 	 << "      return true;\n"
 	 << "    }\n\n"
-	 << "    if (!(element >> d_" << name << ".emplace())) {\n"
+	 << "    if (!(**iter >> obj." << name << "().emplace())) {\n"
 	 << "      return false;\n"
 	 << "    }\n"
 	 << "  } // END " << name << "\n\n";
@@ -461,7 +461,7 @@ struct Context
         : d_stream(stream)
         , d_context(context)
     {
-      d_stream << "inline bool operator>>(const kdadm::Element &element, "
+      d_stream << "bool operator>>(const kdadm::Element &element, "
                << className << "& obj);\n";
     }
 
@@ -493,7 +493,7 @@ struct Context
         : d_stream(stream)
         , d_context(context)
     {
-      d_stream << "inline bool operator>>(const kdadm::Element &element, "
+      d_stream << "bool operator>>(const kdadm::Element &element, "
                << className << "& obj)\n{\n";
     }
 
@@ -692,8 +692,9 @@ struct Context
 
       beginDocument(stream, filename);
 
-      stream << "#include <" << headerFilename << ">\n\n";
-      
+      stream << "#include <" << headerFilename << ">\n"
+             << "#include <spdlog/fmt/bundled/ostream.h>\n\n";
+
       beginNamespaces(stream);
 
       {
