@@ -327,6 +327,16 @@ inline bool operator>>(const Element& element, double& result)
   return true;
 }
 
+inline bool operator>>(const Element& element, bool& result)
+{
+  if (!element.isValueType()) {
+    return false;
+  }
+
+  result = "true" == element.value() || "1" == element.value();
+  return true;
+}
+
 template <class Type>
 inline bool operator>>(const Element& element, Type& result)
 {

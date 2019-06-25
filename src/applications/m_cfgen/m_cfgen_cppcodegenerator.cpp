@@ -446,6 +446,38 @@ struct Context
   };
 
   // -----------------------------------
+  // Struct StreamDefinitionGenerator
+  // -----------------------------------
+  struct StreamDefinitionGenerator
+  {
+    // PUBLIC DATA
+    std::ostream &d_stream;
+    const Context *d_context;
+
+    // CREATORS
+    StreamDefinitionGenerator(std::ostream &     stream,
+                                 const Context *    context,
+                                 const std::string &className)
+        : d_stream(stream)
+        , d_context(context)
+    {
+      d_stream << "inline bool operator>>(const kdadm::Element &element, "
+               << className << "& obj);\n";
+    }
+
+    StreamDefinitionGenerator(const StreamDefinitionGenerator&) = delete;
+    
+    ~StreamDefinitionGenerator()
+    {
+    }
+    
+    // MANIPULATORS
+    void operator()(std::shared_ptr<kdadm::Element> element)
+    {
+    }
+  };
+
+  // -----------------------------------
   // Struct StreamSpecificationGenerator
   // -----------------------------------
   struct StreamSpecificationGenerator
@@ -495,6 +527,7 @@ struct Context
     }
   };
 
+  
   // ------------------------------
   // Struct TypeDefinitionGenerator
   // ------------------------------
@@ -545,6 +578,34 @@ struct Context
 	       << "// Class " << name << "\n"
 	       << "// " << std::string(name.size() + 6, '-') << "\n\n";
 
+      StreamDefinitionGenerator streamDefinitionGenerator(
+          d_stream, d_context, name);
+      sequence->getElementsByTagName("xs:element",
+                                     std::ref(streamDefinitionGenerator));
+    }
+  };
+
+  // ---------------------------------
+  // Struct TypeSpecificationGenerator
+  // ---------------------------------
+  struct TypeSpecificationGenerator
+  {
+    // PUBLIC DATA
+    std::ostream & d_stream;
+    const Context *d_context;
+
+    // CREATORS
+    TypeSpecificationGenerator(std::ostream &stream, const Context *context)
+        : d_stream(stream)
+        , d_context(context)
+    {}
+
+    // MANIPULATORS
+    void operator()(std::shared_ptr<kdadm::Element> element)
+    {
+      std::string name     = extractAttribute("name", element);
+      auto        sequence = extractElement("xs:sequence", element);
+
       StreamSpecificationGenerator streamSpecificationGenerator(
           d_stream, d_context, name);
       sequence->getElementsByTagName("xs:element",
@@ -552,6 +613,7 @@ struct Context
     }
   };
 
+  
   void beginDocument(std::ostream &stream, const std::string &filename) const
   {
     stream << "// " << filename << std::string(80 - filename.size() - 13, ' ')
@@ -606,27 +668,51 @@ struct Context
 	return false;
       }
     }
-
-    // { // Source
-    //   std::string   filename = lcNs + "_" + lcName + ".cpp";
-    //   std::ofstream stream(filename);
-    //   if (!stream) {
-    //     std::cerr << "Error opening header file: '" << filename << "'.\n";
-    //     return false;
-    //   }
-
-    //   beginDocument(stream, filename);
-
-    //   beginNamespaces(stream);
-
-    //   TypeSpecificationGenerator typeGenerator(stream, this);
-    //   d_root->getElementsByTagName("xs:complexType", std::ref(typeGenerator));
-
-    //   endNamespaces(stream);
-    // }
     
     return true;
   }
+
+  bool generateSource() const
+  {
+    std::string lcNs   = d_ns;
+    std::string lcName = d_name;
+
+    std::transform(lcNs.begin(), lcNs.end(), lcNs.begin(), ::tolower);
+    std::transform(lcName.begin(), lcName.end(), lcName.begin(), ::tolower);
+
+    { // Header
+      std::string   filename       = lcNs + "_" + lcName + ".cpp";
+      std::string   headerFilename = lcNs + "_" + lcName + ".h";
+
+      std::ofstream stream(filename);
+      if (!stream) {
+        std::cerr << "Error opening source file: '" << filename << "'.\n";
+        return false;
+      }
+
+      beginDocument(stream, filename);
+
+      stream << "#include <" << headerFilename << ">\n\n";
+      
+      beginNamespaces(stream);
+
+      {
+        TypeSpecificationGenerator typeGenerator(stream, this);
+        d_root->getElementsByTagName("xs:complexType", std::ref(typeGenerator));
+      }
+
+      endNamespaces(stream);
+
+      if (!stream) {
+	return false;
+      }
+    }
+    
+    return true;
+  }
+
+
+
 };
 }; // anonymous namespace
 
@@ -643,28 +729,20 @@ bool CppCodeGenerator::generate(const kdadm::Document &document)
   auto root = document.root();
   assert(root);
 
-  auto name = kdadm::ElementUtils::getAttributeByName(
-      "name", root->attributes().begin(), root->attributes().end());
-  assert(root->attributes().end() != name);
-
-  auto ns = kdadm::ElementUtils::getAttributeByName(
-      "ns", root->attributes().begin(), root->attributes().end());
-  assert(root->attributes().end() != ns);
-
-  auto enterpriseNs = kdadm::ElementUtils::getAttributeByName(
-      "enterpriseNs", root->attributes().begin(), root->attributes().end());
-  assert(root->attributes().end() != enterpriseNs);
-
   Context context;
   context.d_root         = root;
-  context.d_enterpriseNs = enterpriseNs->second;
-  context.d_ns           = ns->second;
-  context.d_name         = name->second;
+  context.d_enterpriseNs = extractAttribute("enterpriseNs", root);
+  context.d_ns           = extractAttribute("ns", root);
+  context.d_name         = extractAttribute("name", root);
 
   if (!context.generateHeader()) {
     return false;
   }
 
+  if (!context.generateSource()) {
+    return false;
+  }
+  
   return true;
 }
 

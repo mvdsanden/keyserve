@@ -154,15 +154,39 @@ TEST(ElementTest, StreamConversion)
   }
   {
     float result;
-    std::unique_ptr<Element> obj = Element::createValue("0.1234567");
+    std::unique_ptr<Element> obj = Element::createValue("0.123");
     *obj.get() >> result;
-    ASSERT_EQ(result, 0.1234567);
+    ASSERT_EQ(result, 0.123f);
   }    
   {
     double result;
-    std::unique_ptr<Element> obj = Element::createValue("0.123456789");
+    std::unique_ptr<Element> obj = Element::createValue("0.123");
     *obj.get() >> result;
-    ASSERT_EQ(result, 0.123456789);
+    ASSERT_EQ(result, 0.123);
+  }
+  {
+    bool result;
+    std::unique_ptr<Element> obj = Element::createValue("1");
+    *obj.get() >> result;
+    ASSERT_TRUE(result);
+  }
+  {
+    bool result;
+    std::unique_ptr<Element> obj = Element::createValue("0");
+    *obj.get() >> result;
+    ASSERT_FALSE(result);
+  }
+  {
+    bool result;
+    std::unique_ptr<Element> obj = Element::createValue("true");
+    *obj.get() >> result;
+    ASSERT_TRUE(result);
+  }
+  {
+    bool result;
+    std::unique_ptr<Element> obj = Element::createValue("false");
+    *obj.get() >> result;
+    ASSERT_FALSE(result);
   }
 }
 
