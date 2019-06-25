@@ -229,6 +229,7 @@ void generateStreamParseManditory(std::ostream &     stream,
 	 << "      return false;\n"
 	 << "    }\n\n"
 	 << "    if (!(**iter >> obj." << name << "())) {\n"
+	 << "      spdlog::error(\"{}: expected " << type <<" value\", (*iter)->location());\n"
 	 << "      return false;\n"
 	 << "    }\n"
 	 << "  } // END " << name << "\n\n";
@@ -277,6 +278,7 @@ void generateStreamParseOptional(std::ostream &     stream,
 	 << "      return true;\n"
 	 << "    }\n\n"
 	 << "    if (!(**iter >> obj." << name << "().emplace())) {\n"
+	 << "      spdlog::error(\"{}: expected " << type <<" value\", (*iter)->location());\n"
 	 << "      return false;\n"
 	 << "    }\n"
 	 << "  } // END " << name << "\n\n";

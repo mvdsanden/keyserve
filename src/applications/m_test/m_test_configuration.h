@@ -18,6 +18,7 @@ std::string d_to;
 std::string d_from;
 std::optional<std::string> d_heading;
 std::vector<std::string> d_body;
+long long d_count;
 public:
 // CREATORS
 // MANIPULATOR
@@ -25,11 +26,13 @@ std::string& to() { return d_to;}
 std::string& from() { return d_from;}
 std::optional<std::string>& heading() { return d_heading;}
 std::vector<std::string>& body() { return d_body;}
+long long& count() { return d_count;}
 // ACCESSORS
 const std::string& to() const { return d_to;}
 const std::string& from() const { return d_from;}
 const std::optional<std::string>& heading() const { return d_heading;}
 const std::vector<std::string>& body() const { return d_body;}
+const long long& count() const { return d_count;}
 }; // class Note
 
 // --- inline methods ---

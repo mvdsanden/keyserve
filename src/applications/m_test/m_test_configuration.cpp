@@ -20,6 +20,7 @@ bool operator>>(const kdadm::Element &element, Note& obj)
     }
 
     if (!(**iter >> obj.to())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
       return false;
     }
   } // END to
@@ -37,6 +38,7 @@ bool operator>>(const kdadm::Element &element, Note& obj)
     }
 
     if (!(**iter >> obj.from())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
       return false;
     }
   } // END from
@@ -52,6 +54,7 @@ bool operator>>(const kdadm::Element &element, Note& obj)
     }
 
     if (!(**iter >> obj.heading().emplace())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
       return false;
     }
   } // END heading
@@ -73,6 +76,24 @@ bool operator>>(const kdadm::Element &element, Note& obj)
         element.location());
     }
   } // END body
+
+  { // BEGIN count
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "count",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "count");
+      return false;
+    }
+
+    if (!(**iter >> obj.count())) {
+      spdlog::error("{}: expected xs:integer value", (*iter)->location());
+      return false;
+    }
+  } // END count
 
   return true;
 }

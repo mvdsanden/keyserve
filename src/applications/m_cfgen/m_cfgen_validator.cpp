@@ -12,9 +12,9 @@ namespace m_cfgen {
 namespace {
 
 std::pair<std::string, std::shared_ptr<kdadm::Element>>
-internalType(const std::string &name,
-             const std::string &cppName,
-             const std::string &cppInclude)
+internalType(const std::string &               name,
+             const std::string &               cppName,
+             const std::optional<std::string> &cppInclude = std::nullopt)
 {
   auto root = kdadm::Element::createElement("xs:internalType");
   root->attributes().emplace_back("name", name);
@@ -22,7 +22,10 @@ internalType(const std::string &name,
   auto cpp =
       root->children().emplace_back(kdadm::Element::createElement("xs:cpp"));
   cpp->attributes().emplace_back("type", cppName);
-  cpp->attributes().emplace_back("include", cppInclude);
+
+  if (cppInclude) {
+    cpp->attributes().emplace_back("include", *cppInclude);
+  }
   
   return std::make_pair(name, std::move(root));
 }
@@ -45,6 +48,8 @@ struct ValidationContext
   ValidationContext()
   {
     d_complexTypes.insert(internalType("xs:string", "std::string", "string"));
+    d_complexTypes.insert(internalType("xs:integer", "long long"));
+    d_complexTypes.insert(internalType("xs:boolean", "bool"));
   }
   
   // MANIPULATORS

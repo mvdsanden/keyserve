@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
   for (const auto& body : note.body()) {
     std::cout << "BEGIN BODY:\n" << body << "\nEND BODY\n\n";
   }
+
+  std::cout << "Count: " << note.count() << "\n";
   
   return 0;
 }
