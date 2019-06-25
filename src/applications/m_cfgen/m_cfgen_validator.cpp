@@ -3,6 +3,7 @@
 #include <m_cfgen_validator.h>
 
 #include <iostream>
+#include <set>
 #include <unordered_map>
 
 namespace MvdS {
@@ -10,10 +11,25 @@ namespace m_cfgen {
 
 namespace {
 
+std::pair<std::string, std::shared_ptr<kdadm::Element>>
+internalType(const std::string &name,
+             const std::string &cppName,
+             const std::string &cppInclude)
+{
+  auto root = kdadm::Element::createElement("xs:internalType");
+  root->attributes().emplace_back("name", name);
+
+  auto cpp =
+      root->children().emplace_back(kdadm::Element::createElement("xs:cpp"));
+  cpp->attributes().emplace_back("type", cppName);
+  cpp->attributes().emplace_back("include", cppInclude);
+  
+  return std::make_pair(name, std::move(root));
+}
+
 // ------------------------
 // Struct ValidationContext
 // ------------------------
-
 struct ValidationContext
 {
   // PUBLIC TYPES
@@ -21,9 +37,16 @@ struct ValidationContext
                                    ComplexTypes;
 
   // PUBLIC DATA
-  ComplexTypes d_complexTypes;
-  bool         d_success = true;
+  ComplexTypes                               d_complexTypes;
+  bool                                       d_success = true;
+  std::set<std::shared_ptr<kdadm::Element>>  d_usedInternalTypes;
 
+  // CREATORS
+  ValidationContext()
+  {
+    d_complexTypes.insert(internalType("xs:string", "std::string", "string"));
+  }
+  
   // MANIPULATORS
   std::shared_ptr<kdadm::Element> resolveType(const std::string &typeName)
   // Resolve the specified 'typeName' into an element representing the type.
@@ -33,6 +56,11 @@ struct ValidationContext
     if (d_complexTypes.end() == iter) {
       return nullptr;
     }
+
+    if ("xs:internalType" == iter->second->tag()) {
+      d_usedInternalTypes.emplace(iter->second);
+    }
+
     return iter->second;
   }
 
@@ -103,12 +131,7 @@ struct ElementValidator
       : d_context(context)
   {}
 
-  // MANIPULATORS
-  ElementValidator &operator*() { return *this; }
-
-  void operator++() {}
-
-  void operator=(std::shared_ptr<kdadm::Element> element)
+  void operator()(std::shared_ptr<kdadm::Element> element)
   {
     std::string name;
     if (!expectAttribute(&name, "name", element)) {
@@ -149,11 +172,7 @@ struct ComplexTypeValidator
   {}
 
   // MANIPULATORS
-  ComplexTypeValidator &operator*() { return *this; }
-
-  void operator++() {}
-
-  void operator=(std::shared_ptr<kdadm::Element> element)
+  void operator()(std::shared_ptr<kdadm::Element> element)
   {
     std::string typeName;
     if (!expectAttribute(&typeName, "name", element)) {
@@ -169,7 +188,7 @@ struct ComplexTypeValidator
     }
 
     ElementValidator elementTypeValidator(d_context);
-    sequence->getElementsByTagName(elementTypeValidator, "xs:element");
+    sequence->getElementsByTagName("xs:element", std::ref(elementTypeValidator));
 
     if (!d_context->registerType(typeName, element)) {
       d_context->d_success = false;
@@ -193,11 +212,7 @@ struct InternalTypeValidator
   {}
 
   // MANIPULATORS
-  InternalTypeValidator &operator*() { return *this; }
-
-  void operator++() {}
-
-  void operator=(std::shared_ptr<kdadm::Element> element)
+  void operator()(std::shared_ptr<kdadm::Element> element)
   {
     std::string typeName;
     if (!expectAttribute(&typeName, "name", element)) {
@@ -250,10 +265,14 @@ bool Validator::validate(kdadm::Document *document)
   ComplexTypeValidator  complexTypeValidator(&context);
   ElementValidator      elementTypeValidator(&context);
 
-  root->getElementsByTagName(internalTypeValidator, "xs:internalType");
-  root->getElementsByTagName(complexTypeValidator, "xs:complexType");
-  root->getElementsByTagName(elementTypeValidator, "xs:element");
+  root->getElementsByTagName("xs:internalType", std::ref(internalTypeValidator));
+  root->getElementsByTagName("xs:complexType", std::ref(complexTypeValidator));
+  root->getElementsByTagName("xs:element", std::ref(elementTypeValidator));
 
+  for (const auto& internalType : context.d_usedInternalTypes) {
+    root->children().emplace_back(internalType);
+  }
+  
   return context.d_success;
 }
 

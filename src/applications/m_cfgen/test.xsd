@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" name='Configuration' ns='test' enterpriseNs='MvdS'>
 
-  <xs:internalType name='xs:string'>
+<!--  <xs:internalType name='xs:string'>
     <xs:cpp type='std::string' flag='valueType' include="string"/>
-  </xs:internalType>
+  </xs:internalType> -->
   
   <xs:complexType name='Note'>
     <xs:sequence>
