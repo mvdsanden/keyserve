@@ -212,35 +212,12 @@ bool generateManipulatorDefinition(
   return true;
 }
 
-bool generateStreamSpecification(
-    std::ostream &                         stream,
-    std::string                            type,
-    const std::string &                    name,
-    size_t                                 minOccurs,
-    size_t                                 maxOccurs,
-    const std::shared_ptr<kdadm::Element> &typeElement)
-{
-  type = internalTypeName(typeElement).value_or(type);  
-  type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
-  
-  stream << type << "& " << name << "()\n";
-  
-  // TODO: implement!
-
-  stream << "{\n";
-
-  
-
-  stream << "}\n";
-
-  return true;
-}
-
 void generateStreamParseManditory(std::ostream &     stream,
                                   const std::string &name,
                                   const std::string &type)
+// Print stream parsing code for a mandatory element with the specified 'name'
+// and the specified 'type' to the specified 'stream'.
 {
-
   stream << "  { // BEGIN " << name << "\n"
          << "    auto iter = ElementUtils::getElementByTagName(\n"
          << "      \"" << name << "\",\n"
@@ -261,6 +238,8 @@ void generateStreamParseVector(std::ostream &     stream,
                                const std::string &name,
                                const std::string &type,
                                size_t             minOccurs)
+// Print stream parsing code for a multiple occurrence element with the specified
+// 'name' and the specified 'type' to the specified 'stream'.
 {
 
   stream << "  { // BEGIN " << name << "\n"
@@ -285,6 +264,8 @@ void generateStreamParseVector(std::ostream &     stream,
 void generateStreamParseOptional(std::ostream &     stream,
                                  const std::string &name,
                                  const std::string &type)
+// Print stream parsing code for an optional element with the specified
+// 'name' and the specified 'type' to the specified 'stream'.
 {
 
   stream << "  { // BEGIN " << name << "\n"
@@ -503,9 +484,6 @@ struct Context
       extractOccurs(&minOccurs, &maxOccurs, element);
       
       assert(1 == element->children().size());
-
-      // generateStreamSpecification(
-      //     d_stream, type, name, minOccurs, maxOccurs, element->children()[0]);
 
       if (1 == maxOccurs && 1 == minOccurs) {
 	generateStreamParseManditory(d_stream, name, type);
