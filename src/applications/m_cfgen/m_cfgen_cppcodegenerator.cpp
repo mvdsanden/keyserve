@@ -300,11 +300,11 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &        d_stream;
-    Context *             d_context;
+    const Context *       d_context;
     std::set<std::string> d_includes;
 
     // CREATORS
-    IncludesGenerator(std::ostream &stream, Context *context)
+    IncludesGenerator(std::ostream &stream, const Context *context)
         : d_stream(stream)
         , d_context(context)
     {
@@ -347,10 +347,10 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &d_stream;
-    Context *     d_context;
+    const Context *d_context;
 
     // CREATORS
-    VariableDefinitionGenerator(std::ostream &stream, Context *context)
+    VariableDefinitionGenerator(std::ostream &stream, const Context *context)
         : d_stream(stream)
         , d_context(context)
     {
@@ -382,10 +382,10 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &d_stream;
-    Context *     d_context;
+    const Context *d_context;
 
     // CREATORS
-    AccessorDefinitionGenerator(std::ostream &stream, Context *context)
+    AccessorDefinitionGenerator(std::ostream &stream, const Context *context)
         : d_stream(stream)
         , d_context(context)
     {
@@ -417,10 +417,10 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &d_stream;
-    Context *     d_context;
+    const Context *d_context;
 
     // CREATORS
-    ManipulatorDefinitionGenerator(std::ostream &stream, Context *context)
+    ManipulatorDefinitionGenerator(std::ostream &stream, const Context *context)
         : d_stream(stream)
         , d_context(context)
     {
@@ -452,11 +452,11 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &d_stream;
-    Context *     d_context;
+    const Context *d_context;
 
     // CREATORS
     StreamSpecificationGenerator(std::ostream &     stream,
-                                 Context *          context,
+                                 const Context *    context,
                                  const std::string &className)
         : d_stream(stream)
         , d_context(context)
@@ -502,10 +502,10 @@ struct Context
   {
     // PUBLIC DATA
     std::ostream &d_stream;
-    Context *     d_context;
+    const Context *d_context;
 
     // CREATORS
-    TypeDefinitionGenerator(std::ostream &stream, Context *context)
+    TypeDefinitionGenerator(std::ostream &stream, const Context *context)
         : d_stream(stream)
         , d_context(context)
     {}
@@ -552,25 +552,25 @@ struct Context
     }
   };
 
-  void beginDocument(std::ostream &stream, const std::string &filename)
+  void beginDocument(std::ostream &stream, const std::string &filename) const
   {
     stream << "// " << filename << std::string(80 - filename.size() - 13, ' ')
            << "-*-c++-*-\n";
   }
 
-  void beginNamespaces(std::ostream &stream)
+  void beginNamespaces(std::ostream &stream) const
   {
     stream << "namespace " << d_enterpriseNs << " {\n";
     stream << "namespace " << d_ns << " {\n\n";
   }
 
-  void endNamespaces(std::ostream &stream)
+  void endNamespaces(std::ostream &stream) const
   {
     stream << "}; // namespace " << d_ns << "\n";
     stream << "}; // namespace " << d_enterpriseNs << "\n";
   }
 
-  bool generateHeader()
+  bool generateHeader() const
   {
     std::string lcNs   = d_ns;
     std::string lcName = d_name;
