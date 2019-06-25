@@ -18,89 +18,130 @@ namespace m_cfgen {
 namespace {
 
 std::shared_ptr<kdadm::Element>
-tryExtractElement(const std::string &                    name,
-               const std::shared_ptr<kdadm::Element> &element)
+tryExtractElement(const std::string &                    tagName,
+                  const std::shared_ptr<kdadm::Element> &element)
+// Try to extract a child with the specified 'tagName' from the specified
+// 'element'. Return the child element or NULL when it does not exist.
 {
   auto iter = kdadm::ElementUtils::getElementByTagName(
-      name, element->children().begin(), element->children().end());
+      tagName, element->children().begin(), element->children().end());
   return (element->children().end() != iter?*iter:nullptr);
 }
   
 std::shared_ptr<kdadm::Element>
-extractElement(const std::string &                    name,
+extractElement(const std::string &                    tagName,
                const std::shared_ptr<kdadm::Element> &element)
+// Extract a child with the specified 'tagName' from the specified 'element'.
+// Return the child element. Behavior is undefined unless there exists at least
+// one element with 'tagName' in 'element'.
 {
-  auto result = tryExtractElement(name, element);
+  auto result = tryExtractElement(tagName, element);
   assert(result);
   return result;
-}
-  
-std::shared_ptr<kdadm::Element>
-cppFromInternal(const std::shared_ptr<kdadm::Element> &typeElement)
-{
-  auto cppIter = kdadm::ElementUtils::getElementByTagName(
-      "xs:cpp", typeElement->children().begin(), typeElement->children().end());
-  return (cppIter != typeElement->children().end()?*cppIter:nullptr);
-}
-
-bool cppTypeName(std::string *                          typeName,
-                 const std::shared_ptr<kdadm::Element> &cpp)
-{
-  auto typeIter = kdadm::ElementUtils::getAttributeByName(
-      "type", cpp->attributes().begin(), cpp->attributes().end());
-
-  if (cpp->attributes().end() == typeIter) {
-    std::cerr << cpp->location() << " expected 'type' attribute.\n";
-    return false;
-  }
-
-  *typeName = typeIter->second;
-  
-  return true;
 }
 
 std::optional<std::string>
 tryExtractAttribute(const std::string &                    name,
                     const std::shared_ptr<kdadm::Element> &element)
+// Try to extract an attribute with the specified 'name' from the specified
+// 'element'. Return the value as an optional.
 {
   auto iter = kdadm::ElementUtils::getAttributeByName(
       name, element->attributes().begin(), element->attributes().end());
-  return (element->attributes().end() != iter ? iter->second : nullptr);
+  if (element->attributes().end() == iter) {
+    return std::nullopt;
+  }
+  
+  return iter->second;
 }
+
+std::optional<long long>
+tryExtractIntegerAttribute(const std::string &                    name,
+                           const std::shared_ptr<kdadm::Element> &element)
+// Try to extract an integer attribute with the specified 'name' from the
+// specified 'element'. Return the value as an optional.
+{
+  auto value = tryExtractAttribute(name, element);
+  if (!value) {
+    return std::nullopt;
+  }
+
+  return std::stoll(*value);
+}
+
   
 std::string extractAttribute(const std::string &                    name,
                              const std::shared_ptr<kdadm::Element> &element)
+// Extract an attribute with the specified 'name' from the specified
+// 'element'. Return the value. Behavior is undefined unless an attribute with
+// 'name' exists.
 {
-  auto iter = kdadm::ElementUtils::getAttributeByName(
-      name, element->attributes().begin(), element->attributes().end());
-  assert(element->attributes().end() != iter);
-  return iter->second;
+  auto result = tryExtractAttribute(name, element);
+  assert(result);
+  return *result;;
+}
+  
+std::shared_ptr<kdadm::Element>
+cppFromInternal(const std::shared_ptr<kdadm::Element> &typeElement)
+// Try to extract a child the 'xs:cpp' tag name from the specified
+// 'typeElement'. Return the child element or NULL when it does not exist.
+{
+  return tryExtractElement("xs:cpp", typeElement);
+}
+
+std::optional<std::string>
+cppTypeName(const std::shared_ptr<kdadm::Element> &cpp)
+// Try to extract the internal type name from the specified 'cpp' element.
+// Return an optional value.
+{
+  auto type = tryExtractAttribute("type", cpp);
+
+  if (!cpp) {
+    std::cerr << cpp->location() << " expected 'type' attribute.\n";
+  }
+
+  return std::move(type);
+}
+
+std::optional<std::string>
+internalTypeName(const std::shared_ptr<kdadm::Element> &typeElement)
+// Return the internal type name if the specified 'typeElement' is an internal
+// type, return 'std::nullopt' otherwise.
+{
+  if ("xs:internalType" != typeElement->tag()) {
+    return std::nullopt;
+  }
+
+  auto cpp = cppFromInternal(typeElement);
+  if (!cpp) {
+    std::cerr << typeElement->location()
+              << " no 'cpp' specification for internal type.\n";
+    return std::nullopt;
+  }
+
+  return std::move(cppTypeName(cpp));
 }
 
 void extractOccurs(size_t *                               minOccurs,
                    size_t *                               maxOccurs,
                    const std::shared_ptr<kdadm::Element> &element)
+// Extract the occurs attributes from the specified 'element' and store them
+// into the specified 'minOccurs' and the specified 'maxOccurs'.
 {
   assert(minOccurs);
   assert(maxOccurs);
-  
-  auto minOccursIter = kdadm::ElementUtils::getAttributeByName(
-      "minOccurs", element->attributes().begin(), element->attributes().end());
 
-  *minOccurs = (element->attributes().end() == minOccursIter
-                   ? *minOccurs
-                   : std::stoi(minOccursIter->second));
+  *minOccurs =
+      tryExtractIntegerAttribute("minOccurs", element).value_or(*minOccurs);
 
-  auto maxOccursIter = kdadm::ElementUtils::getAttributeByName(
-      "maxOccurs", element->attributes().begin(), element->attributes().end());
-
-  *maxOccurs = (element->attributes().end() == maxOccursIter
-                   ? *maxOccurs
-                   : std::stoi(maxOccursIter->second));
+  *maxOccurs =
+      tryExtractIntegerAttribute("maxOccurs", element).value_or(*maxOccurs);
 }
 
 std::string
 modifyTypeForOccurs(std::string type, size_t minOccurs, size_t maxOccurs)
+// Modify the specified 'type' so that it complies with the specified
+// 'minOccurs' and the specified 'maxOccurs'. Return the modified type.
 {
   if (1 < maxOccurs) {
     type = "std::vector<" + type + ">";
@@ -112,31 +153,25 @@ modifyTypeForOccurs(std::string type, size_t minOccurs, size_t maxOccurs)
 }
 
 void generateClassBanner(std::ostream &stream, const std::string &name)
+// Print a class banner with the specified 'name' to the specified 'stream'.
 {
   stream << "// " << std::string(name.size() + 6, '-') << "\n";
   stream << "// class " << name << "\n";
   stream << "// " << std::string(name.size() + 6, '-') << "\n";
 }
 
-bool generateVariableDefinition(
+bool generateMemberVariableDefinition(
     std::ostream &                         stream,
     std::string                            type,
     const std::string &                    name,
     size_t                                 minOccurs,
     size_t                                 maxOccurs,
     const std::shared_ptr<kdadm::Element> &typeElement)
+// Print a member variable definition with the specified 'type', the specified
+// 'name' for the specified 'minOccurs' and the specified 'maxOccurs' having the
+// specified 'typeElement' to the specified 'stream'.
 {
-  if ("xs:internalType" == typeElement->tag()) {
-    auto cpp = cppFromInternal(typeElement);
-    if (!cpp) {
-      std::cerr << typeElement->location()
-                << " no 'cpp' specification for internal type.\n";
-      return false;
-    }
-
-    cppTypeName(&type, cpp);
-  }
-
+  type = internalTypeName(typeElement).value_or(type);
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
   
   stream << type << " d_" << name << ";\n";
@@ -150,20 +185,12 @@ bool generateAccessorDefinition(
     size_t                                 minOccurs,
     size_t                                 maxOccurs,
     const std::shared_ptr<kdadm::Element> &typeElement)
+// Print a accessor definition with the specified 'type', the specified
+// 'name' for the specified 'minOccurs' and the specified 'maxOccurs' having the
+// specified 'typeElement' to the specified 'stream'.
 {
-  if ("xs:internalType" == typeElement->tag()) {
-    auto cpp = cppFromInternal(typeElement);
-    if (!cpp) {
-      std::cerr << typeElement->location()
-                << " no 'cpp' specification for internal type.\n";
-      return false;
-    }
-
-    cppTypeName(&type, cpp);
-  }
-
-  type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
-  
+  type = internalTypeName(typeElement).value_or(type);
+  type = modifyTypeForOccurs(type, minOccurs, maxOccurs);  
   stream << "const " << type << "& " << name << "() const;\n";
   return true;
 }
@@ -175,21 +202,13 @@ bool generateManipulatorDefinition(
     size_t                                 minOccurs,
     size_t                                 maxOccurs,
     const std::shared_ptr<kdadm::Element> &typeElement)
+// Print a manipulator definition with the specified 'type', the specified
+// 'name' for the specified 'minOccurs' and the specified 'maxOccurs' having the
+// specified 'typeElement' to the specified 'stream'.
 {
-  if ("xs:internalType" == typeElement->tag()) {
-    auto cpp = cppFromInternal(typeElement);
-    if (!cpp) {
-      std::cerr << typeElement->location()
-                << " no 'cpp' specification for internal type.\n";
-      return false;
-    }
-
-    cppTypeName(&type, cpp);
-  }
-
+  type = internalTypeName(typeElement).value_or(type);
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);  
   stream << type << "& " << name << "();\n";
-
   return true;
 }
 
@@ -201,18 +220,9 @@ bool generateStreamSpecification(
     size_t                                 maxOccurs,
     const std::shared_ptr<kdadm::Element> &typeElement)
 {
-  if ("xs:internalType" == typeElement->tag()) {
-    auto cpp = cppFromInternal(typeElement);
-    if (!cpp) {
-      std::cerr << typeElement->location()
-                << " no 'cpp' specification for internal type.\n";
-      return false;
-    }
-
-    cppTypeName(&type, cpp);
-  }
-
+  type = internalTypeName(typeElement).value_or(type);  
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
+  
   stream << type << "& " << name << "()\n";
   
   // TODO: implement!
@@ -379,7 +389,7 @@ struct Context
 
       assert(1 == element->children().size());
 
-      generateVariableDefinition(
+      generateMemberVariableDefinition(
           d_stream, type, name, minOccurs, maxOccurs, element->children()[0]);
     }
   };
