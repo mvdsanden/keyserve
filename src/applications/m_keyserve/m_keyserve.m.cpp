@@ -51,8 +51,6 @@ int main(int argc, char *argv[])
   //   return 4;
   // }
 
-  // ksrv::CachingKeyStore cachingKeyStore(keyStore.get(), config);
-
   // a_kscrypto::CryptoFactory cryptoFactory(config);
   // std::unique_ptr<ksrv::Crypto> crypto = cryptoFactory.create();
   // if (!crypto) {
@@ -62,10 +60,21 @@ int main(int argc, char *argv[])
   // if (!crypto.start()) {
   //   return 6;
   // }
-  
-  // a_ksvcs::ServiceFactory        serviceFactory(config);
-  // ksrv::ServiceFactory::Services services =
-  //     serviceFactory.createConfigured(&services, &cachingKeyStore);
+
+  // ksrv::CachingKeyStore   cachingKeyStore(keyStore.get(), config);
+  // ksrv::KeyManager        keyManager(&cachingKeyStore, crypto.get(), config);
+  // ksrv::SecuredKeyManager securedKeyManager(&keyManager, config);
+  // // - SecuredKeyManager friends SecurityManager so that it can only access KeyManagerSessions (private: SecuredKeyManager::createSession(domains...)?)?
+  // // - SecuredKeyManagerSessions are wrappers around KeyManager that perform access checks.
+
+
+  // ksrv::SecurityManager securityManager(&securedKeyManager, config);
+
+  // // Service sessions should get access to the key manager by entering a secure
+  // // session through the security manager!!
+  // a_ksvcs::ServiceFactory        serviceFactory(&securityManager, config);
+  // ksrv::ServiceFactory::Services services;
+  // serviceFactory.createConfigured(&services);
 
   // if (!startAllServices(&services)) {
   //   LOG_ERR("No services started");
