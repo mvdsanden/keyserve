@@ -1,1 +1,4 @@
 ksvc_commandlineargs
+ksvc_keymanager
+ksvc_securedkeymanager
+ksvc_securedkeymanagersession
