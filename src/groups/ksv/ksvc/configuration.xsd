@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	   name='Configuration'
+	   ns='ksvc'
+	   enterpriseNs='MvdS'>
+
+  <xs:complexType name='KeyStoreConfig'>
+    <xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name='Configuration'>
+    <xs:sequence>
+      <xs:element name="keyStore" type="KeyStoreConfig"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>
+
