@@ -3,7 +3,7 @@
 
 namespace MvdS {
 namespace ksvc {
-
+  
 // ----------------------
 // Class: CachingKeyStore
 // ----------------------

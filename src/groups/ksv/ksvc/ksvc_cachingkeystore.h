@@ -26,9 +26,10 @@ class CachingKeyStore : public KeyStore
     using TypeSP = std::shared_ptr<T>;
 
     // DATA
-    std::mutex                        d_mutex;
-    TypeSP                            d_object;
-    std::list<ResultFunction<TypeSP>> d_waitList;
+    std::mutex                          d_mutex;
+    ResultStatus                        d_status = ResultStatus::e_waiting;
+    TypeSP                              d_object;
+    std::vector<ResultFunction<TypeSP>> d_waitList;
 
     // MANIPULATORS
     void getValue(ResultFunction<std::shared_ptr<T>> result);
@@ -36,6 +37,10 @@ class CachingKeyStore : public KeyStore
     // value. Note that the value might not yet be available, in which case it
     // will wait for the backend to provide it. The result could also be called
     // with an 'e_timedout' status.
+
+    void updateValue(const ResultStatus &status, std::shared_ptr<T> value);
+    // Update with the specified 'status' and the specified 'value'. Call all
+    // waitlist function.
   };
 
   typedef std::variant<CacheType<KeyRing>, CacheType<CryptoKey>> CacheObject;
@@ -66,8 +71,10 @@ class CachingKeyStore : public KeyStore
   // Return corresponding cache object if an empty cache value was created.
 
   template <class T>
-  void updateCacheValue(const ResultStatus& status, std::shared_ptr<T> value);
-  
+  void updateCacheValue(const ResultStatus &         status,
+                        std::shared_ptr<T>           value,
+                        std::shared_ptr<CacheObject> cacheObject);
+
 public:
   // CREATORS
   CachingKeyStore(KeyStore *backingKeyStore);
@@ -115,12 +122,29 @@ void CachingKeyStore::CacheObject::getValue(
     ResultFunction<std::shared_ptr<T>> result)
 {
   auto guard = std::unique_lock(d_mutex);
-  if (d_object) {
-    result(ResultStatus::e_success, d_object);
+  if (ResultStatus::e_waiting != d_status) {
+    result(d_status, d_object);
     return;
   }
 
   d_waitList.emplace_back(std::move(result));
+}
+
+void CachingKeyStore::CacheObject::updateValue(const ResultStatus &status,
+                                               std::shared_ptr<T>  value)
+{
+  std::vector<ResultFunction<TypeSP>> waitList;
+
+  {
+    auto guard = std::unique_lock(d_mutex);
+    d_status   = status;
+    d_object   = value;
+    std::swap(waitList, d_waitList);
+  }
+
+  for (ResultFunction<TypeSP> &result : waitList) {
+    result(status, value);
+  }
 }
 
 // ---------------------
@@ -158,11 +182,12 @@ std::shared_ptr<CacheObject> CachingKeyStore::getCacheValue(
 }
 
 template <class T>
-void CachingKeyStore::updateCacheValue(const ResultStatus &status, std::shared_ptr<T> value)
+void CachingKeyStore::updateCacheValue(const ResultStatus &         status,
+                                       std::shared_ptr<T>           value,
+                                       std::shared_ptr<CacheObject> cacheObject)
 {
-
-  
-  
+  assert(std::has_alternative<T>(*cacheObject));
+  std::get<T>(*cacheObject).updateValue(status, std::move(value));
 }
 
 } // namespace ksvc
