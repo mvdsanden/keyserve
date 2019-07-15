@@ -1,18 +1,8 @@
-// ksvc_keystore.cpp                                                  -*-c++-*-
-#include <ksvc_keystore.h>
+// ksvc_resultfunction.cpp                                            -*-c++-*-
+#include <ksvc_resultfunction.h>
 
 namespace MvdS {
 namespace ksvc {
-
-// ---------------
-// Class: KeyStore
-// ---------------
-
-// CREATORS
-
-// MANIPULATORS
-
-// ACCESSORS
 
 } // namespace ksvc
 } // namespace MvdS

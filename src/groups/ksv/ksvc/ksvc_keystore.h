@@ -4,6 +4,7 @@
 
 #include <ksvc_resultfunction.h>
 
+
 #include <string>
 #include <memory>
 
@@ -13,7 +14,8 @@ namespace ksvc {
 // Forward declarations
 class KeyRing;
 class CryptoKey;
-  
+class CryptoKeyVersion;
+
 // ===============
 // Class: KeyStore
 // ===============
@@ -48,7 +50,7 @@ public:
   // Get key ring with the specified 'name'. Call the specified 'result' with
   // the key ring or with the 'e_notFound' status code.
 
-  virtual void getCryptoKey(ResultFunction<std::shared_ptr<KeyRing>> result,
+  virtual void getCryptoKey(ResultFunction<std::shared_ptr<CryptoKey>> result,
                             std::string name)  = 0;
   // Get crypto key with the specified 'name'. Call the specified 'result' with
   // the crypto key or with the 'e_notFound' status code.

@@ -2,9 +2,22 @@
 #ifndef INCLUDED_KSVC_KEYMANAGER
 #define INCLUDED_KSVC_KEYMANAGER
 
+#include <ksvc_resultfunction.h>
+
+#include <string>
+#include <memory>
+
 namespace MvdS {
 namespace ksvc {
 
+// Forward declaration.
+class Crypto;
+class KeyStore;
+class KeyRing;
+class CryptoKey;
+class CryptoKeyVersion;
+class Configuration;
+  
 // =================
 // Class: KeyManager
 // =================
@@ -23,10 +36,6 @@ class KeyManager
   // PRIVATE MANIPULATORS
 
 public:
-  // PUBLIC TYPES
-  template <class T>
-  using ResultFunction = std::function<void (const ResultStatus&, T)>;
-
   // CREATORS
   static KeyManager *
   create(KeyStore *keyStore, Crypto *crypto, const Configuration &config);

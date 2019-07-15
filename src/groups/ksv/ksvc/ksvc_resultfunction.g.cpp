@@ -1,10 +1,22 @@
-// ksvc_keystore.t.cpp                                                -*-c++-*-
-#include <ksvc_keystore.h>
+// ksvc_resultfunction.t.cpp                                          -*-c++-*-
+#include <ksvc_resultfunction.h>
 
 #include <gtest/gtest.h>
 
 using namespace MvdS;
 using namespace MvdS::ksvc;
+
+TEST(ResultFunctionTest, Constructor)
+{
+  // TEST CONSTRUCTOR
+  //
+  // Concern:
+  //   The objects constructor should work.
+  //
+  // Test plan:
+  //   Construct the object.
+  ResultFunction<int> obj;
+}
 
 int main(int argc, char **argv)
 {

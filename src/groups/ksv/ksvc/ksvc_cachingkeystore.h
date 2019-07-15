@@ -3,9 +3,16 @@
 #define INCLUDED_KSVC_CACHINGKEYSTORE
 
 #include <ksvc_keystore.h>
+#include <ksvc_resultfunction.h>
+
+#include <ksvc_cryptokey.pb.h>
+#include <ksvc_cryptokeyversion.pb.h>
+#include <ksvc_keyring.pb.h>
 
 #include <shared_mutex>
 #include <memory>
+#include <variant>
+#include <cassert>
 
 namespace MvdS {
 namespace ksvc {
@@ -32,11 +39,12 @@ class CachingKeyStore : public KeyStore
     std::vector<ResultFunction<TypeSP>> d_waitList;
 
     // MANIPULATORS
-    void getValue(ResultFunction<std::shared_ptr<T>> result);
+    bool getValue(ResultFunction<std::shared_ptr<T>> result);
     // Calls the specified 'result' some time in the future with the cached
     // value. Note that the value might not yet be available, in which case it
     // will wait for the backend to provide it. The result could also be called
-    // with an 'e_timedout' status.
+    // with an 'e_timedout' status. Return 'true' when 'result' was called,
+    // 'false' otherwise.
 
     void updateValue(const ResultStatus &status, std::shared_ptr<T> value);
     // Update with the specified 'status' and the specified 'value'. Call all
@@ -51,6 +59,7 @@ class CachingKeyStore : public KeyStore
   // DATA
   std::shared_mutex d_mutex;
   CacheMap          d_cache;
+  KeyStore *        d_backingKeyStore;
 
   // PRIVATE MANIPULATORS
   std::shared_ptr<CacheObject> getCacheObject(const std::string& name);
@@ -66,19 +75,29 @@ class CachingKeyStore : public KeyStore
 
   template <class T>
   std::shared_ptr<CacheObject>
+  createCacheValue(ResultFunction<std::shared_ptr<T>> result, std::string name);
+
+
+
+  template <class T>
+  std::shared_ptr<CacheObject>
   getCacheValue(ResultFunction<std::shared_ptr<T>> result, std::string name);
   // Call the specified 'result' for the cache value with the specified 'name'.
   // Return corresponding cache object if an empty cache value was created.
 
+  
   template <class T>
   void updateCacheValue(const ResultStatus &         status,
                         std::shared_ptr<T>           value,
                         std::shared_ptr<CacheObject> cacheObject);
+  // Asynchronously called by the backing key store with the specified 'status'
+  // and the specified 'value' for the specified 'cacheObject'.
 
 public:
   // CREATORS
   CachingKeyStore(KeyStore *backingKeyStore);
-  // Create a caching key store with the specified 'backingKeyStore'.
+  // Create a caching key store with the specified 'backingKeyStore'. Note that
+  // this does not take ownership of 'backingKeyStore'.
 
   ~CachingKeyStore();
   
@@ -103,35 +122,37 @@ public:
   // 'result' with the created key or with the 'e_duplicateId' status code.
 
   void getKeyRing(ResultFunction<std::shared_ptr<KeyRing>> result,
-                  std::string                              name) const override;
+                  std::string                              name) override;
   // Get key ring with the specified 'name'. Call the specified 'result' with
   // the key ring or with the 'e_notFound' status code.
 
-  void getCryptoKey(ResultFunction<std::shared_ptr<KeyRing>> result,
-                    std::string name) const override;
+  void getCryptoKey(ResultFunction<std::shared_ptr<CryptoKey>> result,
+                    std::string name) override;
   // Get crypto key with the specified 'name'. Call the specified 'result' with
   // the crypto key or with the 'e_notFound' status code.
 };
 
-// ----------------------------------
-// Class CachingKeyStore::CacheObject
-// ----------------------------------
+// --------------------------------
+// Class CachingKeyStore::CacheType
+// --------------------------------
 
 template <class T>
-void CachingKeyStore::CacheObject::getValue(
+bool CachingKeyStore::CacheType<T>::getValue(
     ResultFunction<std::shared_ptr<T>> result)
 {
   auto guard = std::unique_lock(d_mutex);
   if (ResultStatus::e_waiting != d_status) {
     result(d_status, d_object);
-    return;
+    return true;
   }
 
   d_waitList.emplace_back(std::move(result));
+  return false;
 }
 
-void CachingKeyStore::CacheObject::updateValue(const ResultStatus &status,
-                                               std::shared_ptr<T>  value)
+template <class T>
+void CachingKeyStore::CacheType<T>::updateValue(const ResultStatus &status,
+                                                std::shared_ptr<T>  value)
 {
   std::vector<ResultFunction<TypeSP>> waitList;
 
@@ -152,42 +173,74 @@ void CachingKeyStore::CacheObject::updateValue(const ResultStatus &status,
 // ---------------------
 
 template <class T>
-std::shared_ptr<CacheObject> CachingKeyStore::createCacheObject(const std::string &name, bool *created)
+std::shared_ptr<CachingKeyStore::CacheObject>
+CachingKeyStore::createCacheObject(const std::string &name, bool *created)
 {
   auto guard = std::unique_lock(d_mutex);
-  auto [iter, res] = d_cache.emplace(name, CacheType<T>());
+  auto [iter, res] = d_cache.emplace(
+      name, new CacheObject(std::in_place_type_t<CacheType<T>>()));
   *created = res;
   return iter->second;
 }
 
 template <class T>
-std::shared_ptr<CacheObject> CachingKeyStore::getCacheValue(
+std::shared_ptr<CachingKeyStore::CacheObject>
+CachingKeyStore::createCacheValue(ResultFunction<std::shared_ptr<T>> result,
+                                  std::string                        name)
+{
+  std::shared_ptr<CacheObject> object  = std::move(getCacheObject(name));
+  bool                         created = false;
+
+  if (object) {
+    // Cache object already exists.
+    return nullptr;
+  }
+  
+  object = std::move(createCacheObject<T>(name, &created));
+
+  if (!created || !std::holds_alternative<CacheType<T>>(*object)) {
+    // Object already exists in cache or object holds invalid type.
+    return nullptr;
+  }
+  
+  if (std::get<CacheType<T>>(*object).getValue(result)) {
+    // This should not happen. We created the object, so no other concurrent
+    // call should have been able to ask for a value from the backend.
+    assert(false);
+  }
+
+  return std::move(object);
+}
+
+template <class T>
+std::shared_ptr<CachingKeyStore::CacheObject> CachingKeyStore::getCacheValue(
     ResultFunction<std::shared_ptr<T>> result, std::string name)
 {
-  bool created = false;
-  std::shared_ptr<CacheObject> object = std::move(getCacheObject(name));
-
+  std::shared_ptr<CacheObject> object  = std::move(getCacheObject(name));
+  bool                         created = false;
+  
   if (!object) {
     object = std::move(createCacheObject<T>(name, &created));
   }
 
-  if (!holds_alternative<CacheType<T>>(*object)) {
+  if (!std::holds_alternative<CacheType<T>>(*object)) {
+    // Cache object holds invalid type.
     result(ResultStatus::e_notFound, nullptr);
-    return;
+    return nullptr;
   }
 
   std::get<CacheType<T>>(*object).getValue(result);
 
   return created ? std::move(object) : nullptr;
 }
-
+  
 template <class T>
 void CachingKeyStore::updateCacheValue(const ResultStatus &         status,
                                        std::shared_ptr<T>           value,
                                        std::shared_ptr<CacheObject> cacheObject)
 {
-  assert(std::has_alternative<T>(*cacheObject));
-  std::get<T>(*cacheObject).updateValue(status, std::move(value));
+  assert(std::holds_alternative<CacheType<T>>(*cacheObject));
+  std::get<CacheType<T>>(*cacheObject).updateValue(status, std::move(value));
 }
 
 } // namespace ksvc

@@ -1,5 +1,6 @@
 // ksvc_keymanager.t.cpp                                              -*-c++-*-
 #include <ksvc_keymanager.h>
+#include <ksvc_configuration.h>
 
 #include <gtest/gtest.h>
 
@@ -15,7 +16,8 @@ TEST(KeyManagerTest, Constructor)
   //
   // Test plan:
   //   Construct the object.
-  KeyManager obj;
+  Configuration config;
+  std::unique_ptr<KeyManager> obj(KeyManager::create(nullptr, nullptr, config));
 }
 
 int main(int argc, char **argv)

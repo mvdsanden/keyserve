@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package MvdS.ksvc;
+
+message CryptoKeyVersion {
+  string name = 1;
+};

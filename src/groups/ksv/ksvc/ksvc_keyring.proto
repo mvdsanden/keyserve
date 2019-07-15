@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package MvdS.ksvc;
+
+message KeyRing {
+  string name = 1;
+};

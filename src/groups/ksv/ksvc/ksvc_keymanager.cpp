@@ -1,5 +1,9 @@
 // ksvc_keymanager.cpp                                                -*-c++-*-
 #include <ksvc_keymanager.h>
+#include <ksvc_keystore.h>
+#include <ksvc_cryptokey.pb.h>
+#include <ksvc_cryptokeyversion.pb.h>
+#include <ksvc_keyring.pb.h>
 
 namespace MvdS {
 namespace ksvc {
@@ -37,7 +41,7 @@ class KeyManagerImpl : public KeyManager
 
 public:
   // CREATORS
-  KeyManageImpl(KeyStore *keyStore, Crypto *crypto, const Configuration &config)
+  KeyManagerImpl(KeyStore *keyStore, Crypto *crypto, const Configuration &config)
       : d_keyStore(keyStore)
       , d_crypto(crypto)
   {}
@@ -71,15 +75,15 @@ public:
     }
 
     using namespace std::placeholders;
-    d_crypto->createCryptoKey(std::bind(&KeyManager::createCryptoKey,
-                                        this,
-                                        std::move(result),
-                                        std::move(parent),
-                                        std::move(cryptoKeyId),
-                                        std::move(cryptoKey),
-                                        _1,
-                                        _2),
-                              cryptoKey);
+    // d_crypto->createCryptoKey(std::bind(&KeyManager::createCryptoKey,
+    //                                     this,
+    //                                     std::move(result),
+    //                                     std::move(parent),
+    //                                     std::move(cryptoKeyId),
+    //                                     std::move(cryptoKey),
+    //                                     _1,
+    //                                     _2),
+    //                           cryptoKey);
   }
 
   // ACCESSORS
@@ -95,6 +99,7 @@ public:
 KeyManager *
 KeyManager::create(KeyStore *keyStore, Crypto *crypto, const Configuration &config)
 {
+  return new KeyManagerImpl(keyStore, crypto, config);
 }
 
 // MANIPULATORS

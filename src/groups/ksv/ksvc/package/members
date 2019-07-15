@@ -1,4 +1,10 @@
 ksvc_commandlineargs
 ksvc_configuration
 ksvc_configurationutil
+ksvc_keymanager
 ksvc_keystore
+ksvc_cachingkeystore
+ksvc_keyring.pb
+ksvc_cryptokey.pb
+ksvc_cryptokeyversion.pb
+ksvc_resultfunction
