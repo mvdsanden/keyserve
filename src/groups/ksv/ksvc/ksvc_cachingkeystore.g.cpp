@@ -17,12 +17,18 @@ class TestingKeyStore : public KeyStore
   std::unordered_map<std::string, std::shared_ptr<CryptoKey>> d_cryptoKeys;
 
 public:
+  // PUBLIC DATA
+  size_t d_createCount = 0;
+  size_t d_getCount    = 0;
+
   // MANIPULATORS
   void createKeyRing(ResultFunction<std::shared_ptr<KeyRing>> result,
                      std::string                              parent,
                      std::string                              keyRingId,
                      KeyRing                                  keyRing) override
   {
+    ++d_createCount;
+    
     auto [iter, res] =
         d_keyRings.emplace(parent + "/" + keyRingId, new KeyRing(keyRing));
 
@@ -36,7 +42,13 @@ public:
       CryptoKey                                  cryptoKey,
       std::shared_ptr<CryptoKeyVersion> cryptoKeyVersion = nullptr) override
   {
-    auto [iter, res] = d_cryptoKeys.emplace(parent + "/" + cryptoKeyId,
+    ++d_createCount;
+
+    std::string name = parent + "/" + cryptoKeyId;
+
+    //    std::cout << "BACKING KEY STORE: create '" << name << "'.\n";
+    
+    auto [iter, res] = d_cryptoKeys.emplace(name,
                                             new CryptoKey(cryptoKey));
     result(res ? ResultStatus::e_success : ResultStatus::e_exists,
            iter->second);
@@ -45,6 +57,8 @@ public:
   void getKeyRing(ResultFunction<std::shared_ptr<KeyRing>> result,
                   std::string                              name) override
   {
+    ++d_getCount;
+    
     auto i = d_keyRings.find(name);
 
     if (d_keyRings.end() == i) {
@@ -57,12 +71,18 @@ public:
   void getCryptoKey(ResultFunction<std::shared_ptr<CryptoKey>> result,
                     std::string                                name) override
   {
+    ++d_getCount;
+
+    //    std::cout << "BACKING KEY STORE: get '" << name << "': ";
+    
     auto i = d_cryptoKeys.find(name);
 
     if (d_cryptoKeys.end() == i) {
+      //      std::cout << "NOT FOUND\n";
       result(ResultStatus::e_notFound, nullptr);
     }
 
+    //    std::cout << "FOUND\n";
     result(ResultStatus::e_success, i->second);
   }
 };
@@ -328,6 +348,53 @@ TEST(CachingKeyStoreTest, createCryptoKeyAsync)
       "test1",
       cryptoKey);
 }
+
+TEST(CachingKeyStoreTest, generationTest)
+{
+  TestingKeyStore      backing;
+  CachingKeyStore      obj(&backing);
+
+  std::string parent = "projects/test/locations/A/cryptoKeys";
+  std::string id     = "test";
+  std::string name   = parent + "/" + id;
+
+  ASSERT_EQ(backing.d_createCount, 0);
+
+  for (size_t i = 1; i <= 1001; ++i) {
+    std::ostringstream s;
+    s << id << i;
+
+    CryptoKey cryptoKey;
+    cryptoKey.set_name(s.str());
+
+    obj.createCryptoKey(
+        [&](auto status, auto cryptoKey) {
+          ASSERT_EQ(ResultStatus::e_success, status);
+        },
+        parent,
+        s.str(),
+        cryptoKey);
+  }
+
+  ASSERT_EQ(backing.d_createCount, 1001);
+  ASSERT_EQ(backing.d_getCount, 0);
+
+  for (size_t i = 1001; i >= 1; --i) {
+    std::ostringstream s;
+    s << name << i;
+
+    obj.getCryptoKey(
+        [&](auto status, auto cryptoKey) {
+          ASSERT_EQ(ResultStatus::e_success, status)
+              << "Got status " << status << " for " << s.str();
+        },
+        s.str());
+  }
+
+  ASSERT_EQ(backing.d_createCount, 1001);
+  ASSERT_EQ(backing.d_getCount, 1);
+}
+
 
 int main(int argc, char **argv)
 {

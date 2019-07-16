@@ -26,25 +26,42 @@ class CachingKeyStore : public KeyStore
   // Provides a caching key store.
 
   // TYPES
+  struct CacheBase
+  {
+    // DATA
+    std::mutex   d_mutex;
+    ResultStatus d_status = ResultStatus::e_waiting;
+    size_t       d_generation;
+
+    // CREATORS
+    CacheBase(size_t generation)
+        : d_generation(generation)
+    {}
+  };
+
   template <class T>
-  struct CacheType
+  struct CacheType : public CacheBase
   {
     // TYPES
     using TypeSP = std::shared_ptr<T>;
 
     // DATA
-    std::mutex                          d_mutex;
-    ResultStatus                        d_status = ResultStatus::e_waiting;
     TypeSP                              d_object;
     std::vector<ResultFunction<TypeSP>> d_waitList;
 
+    // CREATORS
+    CacheType(size_t generation)
+      : CacheBase(generation)
+    {}
+
     // MANIPULATORS
-    bool getValue(ResultFunction<std::shared_ptr<T>> result);
+    bool getValue(ResultFunction<std::shared_ptr<T>> result, size_t *generationCounter);
     // Calls the specified 'result' some time in the future with the cached
     // value. Note that the value might not yet be available, in which case it
     // will wait for the backend to provide it. The result could also be called
-    // with an 'e_timedout' status. Return 'true' when 'result' was called,
-    // 'false' otherwise.
+    // with an 'e_timedout' status. The specified 'generationCounter' is
+    // incremented and assigned to the cache object generation. Return 'true'
+    // when 'result' was called, 'false' otherwise.
 
     void updateValue(const ResultStatus &status, std::shared_ptr<T> value);
     // Update with the specified 'status' and the specified 'value'. Call all
@@ -60,6 +77,8 @@ class CachingKeyStore : public KeyStore
   std::shared_mutex d_mutex;
   CacheMap          d_cache;
   KeyStore *        d_backingKeyStore;
+  size_t            d_maxCachedItems;
+  size_t            d_currentGeneration;
 
   // PRIVATE MANIPULATORS
   std::shared_ptr<CacheObject> getCacheObject(const std::string& name);
@@ -104,11 +123,15 @@ class CachingKeyStore : public KeyStore
   // Asynchronously called by the backing key store with the specified 'status'
   // and the specified 'value' for the specified 'cacheObject'.
 
+  void expungeCacheObjectIfNeeded();
+  // Expunge a reasonable to expunge cache object if the number of cache objects exceeds 'd_maxCachedItems'.
+
 public:
   // CREATORS
-  CachingKeyStore(KeyStore *backingKeyStore);
-  // Create a caching key store with the specified 'backingKeyStore'. Note that
-  // this does not take ownership of 'backingKeyStore'.
+  CachingKeyStore(KeyStore *backingKeyStore, size_t maxCachedItems = 1000);
+  // Create a caching key store with the specified 'backingKeyStore' and the
+  // specified 'maxCachedItems'. Note that this does not take ownership of
+  // 'backingKeyStore'.
 
   ~CachingKeyStore();
   
@@ -149,9 +172,12 @@ public:
 
 template <class T>
 bool CachingKeyStore::CacheType<T>::getValue(
-    ResultFunction<std::shared_ptr<T>> result)
+    ResultFunction<std::shared_ptr<T>> result, size_t *generationCounter)
 {
   auto guard = std::unique_lock(d_mutex);
+
+  d_generation = ++*generationCounter;
+
   if (ResultStatus::e_waiting != d_status) {
     result(d_status, d_object);
     return true;
@@ -188,9 +214,16 @@ std::shared_ptr<CachingKeyStore::CacheObject>
 CachingKeyStore::createCacheObject(const std::string &name, bool *created)
 {
   auto guard = std::unique_lock(d_mutex);
-  auto [iter, res] = d_cache.emplace(
-      name, new CacheObject(std::in_place_type_t<CacheType<T>>()));
+
+  expungeCacheObjectIfNeeded();
+
+  auto [iter, res] =
+      d_cache.emplace(name,
+                      new CacheObject(std::in_place_type_t<CacheType<T>>(),
+                                      ++d_currentGeneration));
+
   *created = res;
+  
   return iter->second;
 }
 
@@ -216,7 +249,7 @@ std::shared_ptr<CachingKeyStore::CacheObject> CachingKeyStore::createCacheValue(
     return std::move(object);
   }
   
-  if (std::get<CacheType<T>>(*object).getValue(result)) {
+  if (std::get<CacheType<T>>(*object).getValue(result, &d_currentGeneration)) {
     // This should not happen. We created the object, so no other concurrent
     // call should have been able to ask for a value from the backend.
     assert(false);
@@ -245,7 +278,7 @@ CachingKeyStore::getCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
     return nullptr;
   }
 
-  std::get<CacheType<T>>(*object).getValue(result);
+  std::get<CacheType<T>>(*object).getValue(result, &d_currentGeneration);
 
   return std::move(object);
 }

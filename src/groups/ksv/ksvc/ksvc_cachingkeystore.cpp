@@ -28,13 +28,46 @@ std::shared_ptr<CachingKeyStore::CacheObject>
 CachingKeyStore::getCacheObject(const std::string &name)
 {
   auto guard = std::shared_lock(d_mutex);
-  auto iter = d_cache.find(name);
+  auto iter  = d_cache.find(name);
   return (d_cache.end() == iter)?nullptr:iter->second;
+}
+
+void CachingKeyStore::expungeCacheObjectIfNeeded()
+{
+  if (d_cache.size() < d_maxCachedItems) {
+    return;
+  }
+  
+  CacheMap::const_iterator oldestIter       = d_cache.end();
+  size_t                   oldestGeneration = d_currentGeneration;
+
+  // A linear search should probably be fast enough.
+  
+  for (CacheMap::const_iterator i = d_cache.begin();
+       i != d_cache.end(); ++i) {
+    std::visit(
+        [&](const CacheBase &object) {
+          if (object.d_generation < oldestGeneration) {
+            oldestGeneration = object.d_generation;
+            oldestIter       = i;
+          }
+        },
+        *i->second);
+  }
+
+  if (oldestIter == d_cache.end()) {
+    return;
+  }
+
+  d_cache.erase(oldestIter);
 }
   
 // CREATORS
-CachingKeyStore::CachingKeyStore(KeyStore *backingKeyStore)
+CachingKeyStore::CachingKeyStore(KeyStore *backingKeyStore,
+                                 size_t    maxCachedItems)
     : d_backingKeyStore(backingKeyStore)
+    , d_maxCachedItems(maxCachedItems)
+    , d_currentGeneration(0)
 {}
 
 CachingKeyStore::~CachingKeyStore() {}
