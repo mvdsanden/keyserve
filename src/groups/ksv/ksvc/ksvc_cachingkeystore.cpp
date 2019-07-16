@@ -5,7 +5,21 @@
 
 namespace MvdS {
 namespace ksvc {
-  
+
+namespace {
+
+std::string makeName(const std::string &parent, const std::string &id)
+// Return name for an object with the specified 'parent' and the specified 'id'.
+{
+  std::string name;
+  name.reserve(parent.size() + id.size() + 1);
+  name += parent;
+  name += "/";
+  name += id;
+  return std::move(name);
+}
+} // namespace
+
 // ----------------------
 // Class: CachingKeyStore
 // ----------------------
@@ -33,15 +47,14 @@ void CachingKeyStore::createKeyRing(
     KeyRing                                  keyRing)
 {
   using namespace std::placeholders;
-  
-  std::string name;
-  name.reserve(parent.size() + keyRingId.size() + 1);
-  name += parent;
-  name += "/";
-  name += keyRingId;
 
-  std::shared_ptr<CacheObject> cacheObject = std::move(createCacheValue(result, name));
-  if (!cacheObject) {
+  bool        created = false;
+  std::string name    = std::move(makeName(parent, keyRingId));
+
+  std::shared_ptr<CacheObject> cacheObject =
+      std::move(createCacheValue(result, name, &created));
+
+  if (!created) {
     result(ResultStatus::e_exists, nullptr);
     return;
   }
@@ -65,15 +78,14 @@ void CachingKeyStore::createCryptoKey(
     std::shared_ptr<CryptoKeyVersion>          cryptoKeyVersion)
 {
   using namespace std::placeholders;
-  
-  std::string name;
-  name.reserve(parent.size() + cryptoKeyId.size() + 1);
-  name += parent;
-  name += "/";
-  name += cryptoKeyId;
 
-  std::shared_ptr<CacheObject> cacheObject = std::move(createCacheValue(result, name));
-  if (!cacheObject) {
+  bool        created = false;
+  std::string name    = std::move(makeName(parent, cryptoKeyId));
+
+  std::shared_ptr<CacheObject> cacheObject =
+    std::move(createCacheValue(result, name, &created));
+  
+  if (!created) {
     result(ResultStatus::e_exists, nullptr);
     return;
   }
@@ -93,9 +105,12 @@ void CachingKeyStore::getKeyRing(
     ResultFunction<std::shared_ptr<KeyRing>> result, std::string name)
 {
   using namespace std::placeholders;
-  
-  std::shared_ptr<CacheObject> cacheObject = std::move(getCacheValue(result, name));
-  if (!cacheObject) {
+
+  bool                         created = false;
+  std::shared_ptr<CacheObject> cacheObject =
+      std::move(getCacheValue(result, name, &created));
+
+  if (!created) {
     // Cache object was not newly created, which means 'result' was already
     // called.
     return;
@@ -117,8 +132,11 @@ void CachingKeyStore::getCryptoKey(
 {
   using namespace std::placeholders;
 
-  std::shared_ptr<CacheObject> cacheObject = std::move(getCacheValue(result, name));
-  if (!cacheObject) {
+  bool                         created = false;
+  std::shared_ptr<CacheObject> cacheObject =
+      std::move(getCacheValue(result, name, &created));
+
+  if (!created) {
     // Cache object was not newly created, which means 'result' was already
     // called.
     return;

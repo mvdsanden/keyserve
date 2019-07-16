@@ -75,17 +75,28 @@ class CachingKeyStore : public KeyStore
 
   template <class T>
   std::shared_ptr<CacheObject>
-  createCacheValue(ResultFunction<std::shared_ptr<T>> result, std::string name);
-
-
+  createCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
+                   const std::string &                       name,
+                   bool *                                    created);
+  // Create cache value with the specified 'name' and add the specified 'result'
+  // to its wait list. If there already exists an object with 'name' we do not
+  // add 'result' to the wait list. Store 'true' into the specified 'created' if
+  // we created a newcache object, 'false' otherwise'. Return the new or
+  // existing cache object. Note that if we created the cache object, this means
+  // it's value was not queried from the backend yet, which then needs to be
+  // done.
 
   template <class T>
   std::shared_ptr<CacheObject>
-  getCacheValue(ResultFunction<std::shared_ptr<T>> result, std::string name);
-  // Call the specified 'result' for the cache value with the specified 'name'.
-  // Return corresponding cache object if an empty cache value was created.
+  getCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
+                const std::string &                       name,
+                bool *                                    created);
+  // Cause the specified 'result' to be called at some point in the future with
+  // the value of the object with the specified 'name'. Store 'true' into the
+  // specified 'created' if we created the cache object, 'false' otherwise. Note
+  // that if we created the cache object, this means it's value was not queried
+  // from the backend yet, which then needs to be done.
 
-  
   template <class T>
   void updateCacheValue(const ResultStatus &         status,
                         std::shared_ptr<T>           value,
@@ -184,23 +195,25 @@ CachingKeyStore::createCacheObject(const std::string &name, bool *created)
 }
 
 template <class T>
-std::shared_ptr<CachingKeyStore::CacheObject>
-CachingKeyStore::createCacheValue(ResultFunction<std::shared_ptr<T>> result,
-                                  std::string                        name)
+std::shared_ptr<CachingKeyStore::CacheObject> CachingKeyStore::createCacheValue(
+    const ResultFunction<std::shared_ptr<T>> &result,
+    const std::string &                       name,
+    bool *                                    created)
 {
-  std::shared_ptr<CacheObject> object  = std::move(getCacheObject(name));
-  bool                         created = false;
+  std::shared_ptr<CacheObject> object = std::move(getCacheObject(name));
+  *created                            = false;
 
   if (object) {
     // Cache object already exists.
-    return nullptr;
+    return std::move(object);
   }
   
-  object = std::move(createCacheObject<T>(name, &created));
+  object = std::move(createCacheObject<T>(name, created));
 
-  if (!created || !std::holds_alternative<CacheType<T>>(*object)) {
+  if (!*created || !std::holds_alternative<CacheType<T>>(*object)) {
     // Object already exists in cache or object holds invalid type.
-    return nullptr;
+    assert(!*created);
+    return std::move(object);
   }
   
   if (std::get<CacheType<T>>(*object).getValue(result)) {
@@ -213,25 +226,28 @@ CachingKeyStore::createCacheValue(ResultFunction<std::shared_ptr<T>> result,
 }
 
 template <class T>
-std::shared_ptr<CachingKeyStore::CacheObject> CachingKeyStore::getCacheValue(
-    ResultFunction<std::shared_ptr<T>> result, std::string name)
+std::shared_ptr<CachingKeyStore::CacheObject>
+CachingKeyStore::getCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
+                               const std::string &                       name,
+                               bool *created)
 {
   std::shared_ptr<CacheObject> object  = std::move(getCacheObject(name));
-  bool                         created = false;
-  
+  *created                             = false;
+
   if (!object) {
-    object = std::move(createCacheObject<T>(name, &created));
+    object = std::move(createCacheObject<T>(name, created));
   }
 
   if (!std::holds_alternative<CacheType<T>>(*object)) {
     // Cache object holds invalid type.
+    assert(!*created);
     result(ResultStatus::e_notFound, nullptr);
     return nullptr;
   }
 
   std::get<CacheType<T>>(*object).getValue(result);
 
-  return created ? std::move(object) : nullptr;
+  return std::move(object);
 }
   
 template <class T>
