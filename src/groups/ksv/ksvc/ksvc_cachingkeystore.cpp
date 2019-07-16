@@ -29,7 +29,7 @@ std::shared_ptr<CachingKeyStore::CacheObject>
 CachingKeyStore::getCacheObject(const std::string &name)
 {
   auto guard = std::shared_lock(d_mutex);
-  auto iter  = d_cache.find(name);
+  auto iter  = d_cache.find(name);  
   return (d_cache.end() == iter)?nullptr:iter->second;
 }
 
@@ -64,11 +64,13 @@ void CachingKeyStore::expungeCacheObjectIfNeeded()
 }
   
 // CREATORS
-CachingKeyStore::CachingKeyStore(KeyStore *            backingKeyStore,
-                                 const KeyStoreConfig &config)
+CachingKeyStore::CachingKeyStore(KeyStore *              backingKeyStore,
+                                 const KeyStoreConfig &  config,
+                                 CachingKeyStoreMetrics *metrics)
     : d_backingKeyStore(backingKeyStore)
     , d_maxCachedObjects(config.maxCachedObjects())
     , d_currentGeneration(0)
+    , d_metrics(metrics)
 {}
 
 CachingKeyStore::~CachingKeyStore() {}

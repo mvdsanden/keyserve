@@ -19,6 +19,15 @@ namespace ksvc {
 
 // Forward declaration
 class KeyStoreConfig;
+
+// =============================
+// Struct CachingKeyStoreMetrics
+// =============================
+struct CachingKeyStoreMetrics
+{
+  std::atomic<size_t> d_cacheMisses = 0;
+  std::atomic<size_t> d_cacheHits   = 0;
+};
   
 // ======================
 // Class: CachingKeyStore
@@ -82,6 +91,7 @@ class CachingKeyStore : public KeyStore
   KeyStore *        d_backingKeyStore;
   size_t            d_maxCachedObjects;
   size_t            d_currentGeneration;
+  CachingKeyStoreMetrics *d_metrics;
 
   // PRIVATE MANIPULATORS
   std::shared_ptr<CacheObject> getCacheObject(const std::string& name);
@@ -132,7 +142,9 @@ class CachingKeyStore : public KeyStore
 
 public:
   // CREATORS
-  CachingKeyStore(KeyStore *backingKeyStore, const KeyStoreConfig &config);
+  CachingKeyStore(KeyStore *              backingKeyStore,
+                  const KeyStoreConfig &  config,
+                  CachingKeyStoreMetrics *metrics = nullptr);
   // Create a caching key store with the specified 'backingKeyStore' and the
   // specified 'config'. Note that this does not take ownership of
   // 'backingKeyStore'.
@@ -270,11 +282,18 @@ CachingKeyStore::getCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
 {
   std::shared_ptr<CacheObject> object  = std::move(getCacheObject(name));
   *created                             = false;
-
+ 
   if (!object) {
     object = std::move(createCacheObject<T>(name, created));
   }
 
+  if (d_metrics) {
+    d_metrics->d_cacheMisses.fetch_add(created ? 1 : 0,
+                                       std::memory_order_relaxed);
+    d_metrics->d_cacheHits.fetch_add(created ? 0 : 1,
+                                     std::memory_order_relaxed);
+  }
+  
   if (!std::holds_alternative<CacheType<T>>(*object)) {
     // Cache object holds invalid type.
     assert(!*created);

@@ -360,8 +360,9 @@ TEST(CachingKeyStoreTest, generationTest)
   KeyStoreConfig       config;
   config.maxCachedObjects() = 1000;
 
-  TestingKeyStore      backing;
-  CachingKeyStore      obj(&backing, config);
+  CachingKeyStoreMetrics metrics;
+  TestingKeyStore        backing;
+  CachingKeyStore        obj(&backing, config, &metrics);
 
   std::string parent = "projects/test/locations/A/cryptoKeys";
   std::string id     = "test";
@@ -402,6 +403,9 @@ TEST(CachingKeyStoreTest, generationTest)
 
   ASSERT_EQ(backing.d_createCount, 1001);
   ASSERT_EQ(backing.d_getCount, 1);
+
+  ASSERT_EQ(metrics.d_cacheMisses, 1);
+  ASSERT_EQ(metrics.d_cacheHits, 1000);
 }
 
 
