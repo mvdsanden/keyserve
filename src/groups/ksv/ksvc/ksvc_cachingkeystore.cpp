@@ -1,5 +1,6 @@
 // ksvc_cachingkeystore.cpp                                           -*-c++-*-
 #include <ksvc_cachingkeystore.h>
+#include <ksvc_configuration.h>
 #include <ksvc_cryptokey.pb.h>
 #include <ksvc_keyring.pb.h>
 
@@ -34,7 +35,7 @@ CachingKeyStore::getCacheObject(const std::string &name)
 
 void CachingKeyStore::expungeCacheObjectIfNeeded()
 {
-  if (d_cache.size() < d_maxCachedItems) {
+  if (d_cache.size() < d_maxCachedObjects) {
     return;
   }
   
@@ -63,10 +64,10 @@ void CachingKeyStore::expungeCacheObjectIfNeeded()
 }
   
 // CREATORS
-CachingKeyStore::CachingKeyStore(KeyStore *backingKeyStore,
-                                 size_t    maxCachedItems)
+CachingKeyStore::CachingKeyStore(KeyStore *            backingKeyStore,
+                                 const KeyStoreConfig &config)
     : d_backingKeyStore(backingKeyStore)
-    , d_maxCachedItems(maxCachedItems)
+    , d_maxCachedObjects(config.maxCachedObjects())
     , d_currentGeneration(0)
 {}
 

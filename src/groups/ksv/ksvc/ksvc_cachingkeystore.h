@@ -17,6 +17,9 @@
 namespace MvdS {
 namespace ksvc {
 
+// Forward declaration
+class KeyStoreConfig;
+  
 // ======================
 // Class: CachingKeyStore
 // ======================
@@ -77,7 +80,7 @@ class CachingKeyStore : public KeyStore
   std::shared_mutex d_mutex;
   CacheMap          d_cache;
   KeyStore *        d_backingKeyStore;
-  size_t            d_maxCachedItems;
+  size_t            d_maxCachedObjects;
   size_t            d_currentGeneration;
 
   // PRIVATE MANIPULATORS
@@ -124,13 +127,14 @@ class CachingKeyStore : public KeyStore
   // and the specified 'value' for the specified 'cacheObject'.
 
   void expungeCacheObjectIfNeeded();
-  // Expunge a reasonable to expunge cache object if the number of cache objects exceeds 'd_maxCachedItems'.
+  // Expunge a reasonable to expunge cache object if the number of cache objects
+  // exceeds 'd_maxCachedObjects'.
 
 public:
   // CREATORS
-  CachingKeyStore(KeyStore *backingKeyStore, size_t maxCachedItems = 1000);
+  CachingKeyStore(KeyStore *backingKeyStore, const KeyStoreConfig &config);
   // Create a caching key store with the specified 'backingKeyStore' and the
-  // specified 'maxCachedItems'. Note that this does not take ownership of
+  // specified 'config'. Note that this does not take ownership of
   // 'backingKeyStore'.
 
   ~CachingKeyStore();

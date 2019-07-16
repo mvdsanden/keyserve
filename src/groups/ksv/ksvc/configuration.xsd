@@ -6,6 +6,7 @@
 
   <xs:complexType name='KeyStoreConfig'>
     <xs:sequence>
+      <xs:element name='maxCachedObjects' type='xs:unsigned' default='1000'/>
     </xs:sequence>
   </xs:complexType>
   

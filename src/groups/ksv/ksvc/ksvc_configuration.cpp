@@ -7,6 +7,24 @@ namespace ksvc {
 
 bool operator>>(const kdadm::Element &element, KeyStoreConfig& obj)
 {
+  { // BEGIN maxCachedObjects
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "maxCachedObjects",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "maxCachedObjects");
+      return false;
+    }
+
+    if (!(**iter >> obj.maxCachedObjects())) {
+      spdlog::error("{}: expected xs:unsigned value", (*iter)->location());
+      return false;
+    }
+  } // END maxCachedObjects
+
   return true;
 }
 bool operator>>(const kdadm::Element &element, Configuration& obj)

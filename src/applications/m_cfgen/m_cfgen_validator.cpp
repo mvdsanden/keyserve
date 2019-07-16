@@ -49,6 +49,7 @@ struct ValidationContext
   {
     d_complexTypes.insert(internalType("xs:string", "std::string", "string"));
     d_complexTypes.insert(internalType("xs:integer", "long long"));
+    d_complexTypes.insert(internalType("xs:unsigned", "unsigned long long"));
     d_complexTypes.insert(internalType("xs:boolean", "bool"));
   }
   

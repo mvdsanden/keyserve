@@ -13,10 +13,13 @@ namespace ksvc {
 class KeyStoreConfig
 {
 // DATA
+unsigned long long d_maxCachedObjects = 1000;
 public:
 // CREATORS
 // MANIPULATOR
+unsigned long long& maxCachedObjects() { return d_maxCachedObjects;}
 // ACCESSORS
+const unsigned long long& maxCachedObjects() const { return d_maxCachedObjects;}
 }; // class KeyStoreConfig
 
 // --- inline methods ---

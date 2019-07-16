@@ -1,5 +1,6 @@
 // ksvc_cachingkeystore.t.cpp                                         -*-c++-*-
 #include <ksvc_cachingkeystore.h>
+#include <ksvc_configuration.h>
 
 #include <thread>
 #include <future>
@@ -177,14 +178,16 @@ TEST(CachingKeyStoreTest, Constructor)
   //
   // Test plan:
   //   Construct the object.
+  KeyStoreConfig  config;
   TestingKeyStore backing;
-  CachingKeyStore obj(&backing);
+  CachingKeyStore obj(&backing, config);
 }
 
 TEST(CachingKeyStoreTest, createKeyRing)
 {
+  KeyStoreConfig  config;
   TestingKeyStore backing;
-  CachingKeyStore obj(&backing);
+  CachingKeyStore obj(&backing, config);
 
   std::string name = "projects/test/locations/A/keyRings/test1";
 
@@ -218,8 +221,9 @@ TEST(CachingKeyStoreTest, createKeyRing)
 
 TEST(CachingKeyStoreTest, createCryptoKey)
 {
+  KeyStoreConfig  config;
   TestingKeyStore backing;
-  CachingKeyStore obj(&backing);
+  CachingKeyStore obj(&backing, config);
 
   std::string name = "projects/test/locations/A/cryptoKeys/test1";
 
@@ -253,9 +257,10 @@ TEST(CachingKeyStoreTest, createCryptoKey)
 
 TEST(CachingKeyStoreTest, createKeyRingAsync)
 {
+  KeyStoreConfig       config;
   TestingKeyStore      backing;
   TestingKeyStoreAsync backingAsync(&backing);
-  CachingKeyStore      obj(&backingAsync);
+  CachingKeyStore      obj(&backingAsync, config);
 
   std::string name = "projects/test/locations/A/keyRings/test1";
 
@@ -302,9 +307,10 @@ TEST(CachingKeyStoreTest, createKeyRingAsync)
 
 TEST(CachingKeyStoreTest, createCryptoKeyAsync)
 {
+  KeyStoreConfig       config;
   TestingKeyStore      backing;
   TestingKeyStoreAsync backingAsync(&backing);
-  CachingKeyStore      obj(&backingAsync);
+  CachingKeyStore      obj(&backingAsync, config);
 
   std::string name = "projects/test/locations/A/cryptoKeys/test1";
 
@@ -351,8 +357,11 @@ TEST(CachingKeyStoreTest, createCryptoKeyAsync)
 
 TEST(CachingKeyStoreTest, generationTest)
 {
+  KeyStoreConfig       config;
+  config.maxCachedObjects() = 1000;
+
   TestingKeyStore      backing;
-  CachingKeyStore      obj(&backing);
+  CachingKeyStore      obj(&backing, config);
 
   std::string parent = "projects/test/locations/A/cryptoKeys";
   std::string id     = "test";

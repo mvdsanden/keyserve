@@ -122,6 +122,23 @@ internalTypeName(const std::shared_ptr<kdadm::Element> &typeElement)
   return std::move(cppTypeName(cpp));
 }
 
+std::string typeQuoted(const std::shared_ptr<kdadm::Element> &typeElement,
+                       const std::string &                    value)
+{
+  auto cpp = cppFromInternal(typeElement);
+  if (!cpp) {
+    return value;
+  }
+
+  auto quoteChar = tryExtractAttribute("quote", cpp);
+  if (!quoteChar) {
+    return value;
+  }
+
+  return quoteChar.value() + value + quoteChar.value();
+}
+   
+  
 void extractOccurs(size_t *                               minOccurs,
                    size_t *                               maxOccurs,
                    const std::shared_ptr<kdadm::Element> &element)
@@ -166,7 +183,8 @@ bool generateMemberVariableDefinition(
     const std::string &                    name,
     size_t                                 minOccurs,
     size_t                                 maxOccurs,
-    const std::shared_ptr<kdadm::Element> &typeElement)
+    const std::shared_ptr<kdadm::Element> &typeElement,
+    const std::optional<std::string> &     value)
 // Print a member variable definition with the specified 'type', the specified
 // 'name' for the specified 'minOccurs' and the specified 'maxOccurs' having the
 // specified 'typeElement' to the specified 'stream'.
@@ -174,7 +192,14 @@ bool generateMemberVariableDefinition(
   type = internalTypeName(typeElement).value_or(type);
   type = modifyTypeForOccurs(type, minOccurs, maxOccurs);
   
-  stream << type << " d_" << name << ";\n";
+  stream << type << " d_" << name;
+
+  if (value) {
+    stream << " = " << typeQuoted(typeElement, value.value());
+  }
+
+  stream << ";\n";
+  
   return true;
 }
 
@@ -364,6 +389,8 @@ struct Context
     {
       std::string name = extractAttribute("name", element);
       std::string type = extractAttribute("type", element);
+      std::optional<std::string> value =
+          tryExtractAttribute("default", element);
 
       size_t minOccurs = 1;
       size_t maxOccurs = 1;
@@ -372,8 +399,13 @@ struct Context
 
       assert(1 == element->children().size());
 
-      generateMemberVariableDefinition(
-          d_stream, type, name, minOccurs, maxOccurs, element->children()[0]);
+      generateMemberVariableDefinition(d_stream,
+                                       type,
+                                       name,
+                                       minOccurs,
+                                       maxOccurs,
+                                       element->children()[0],
+                                       value);
     }
   };
 
