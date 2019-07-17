@@ -288,9 +288,9 @@ CachingKeyStore::getCacheValue(const ResultFunction<std::shared_ptr<T>> &result,
   }
 
   if (d_metrics) {
-    d_metrics->d_cacheMisses.fetch_add(created ? 1 : 0,
+    d_metrics->d_cacheMisses.fetch_add(*created ? 1 : 0,
                                        std::memory_order_relaxed);
-    d_metrics->d_cacheHits.fetch_add(created ? 0 : 1,
+    d_metrics->d_cacheHits.fetch_add(*created ? 0 : 1,
                                      std::memory_order_relaxed);
   }
   

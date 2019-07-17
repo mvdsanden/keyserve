@@ -389,6 +389,9 @@ TEST(CachingKeyStoreTest, generationTest)
   ASSERT_EQ(backing.d_createCount, 1001);
   ASSERT_EQ(backing.d_getCount, 0);
 
+  ASSERT_EQ(metrics.d_cacheMisses, 0);
+  ASSERT_EQ(metrics.d_cacheHits, 0);
+  
   for (size_t i = 1001; i >= 1; --i) {
     std::ostringstream s;
     s << name << i;
