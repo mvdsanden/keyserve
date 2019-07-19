@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     return 2;
   }
 
-  // a_kstores::KeyStoreFactory      keyStoreFactory(config.keyStore());
+  // a_kstor::KeyStoreFactory        keyStoreFactory(config.keyStore());
   // std::unique_ptr<ksrv::KeyStore> keyStore = keyStoreFactory.create();
   // if (!keyStore) {
   //   return 3;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   //   return 4;
   // }
 
-  // a_kscrypto::CryptoFactory cryptoFactory(config);
+  // a_kscry::CryptoFactory cryptoFactory(config);
   // std::unique_ptr<ksrv::Crypto> crypto = cryptoFactory.create();
   // if (!crypto) {
   //   return 5;

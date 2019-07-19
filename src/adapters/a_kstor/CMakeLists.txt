@@ -2,4 +2,4 @@ cmake_minimum_required(VERSION 3.7)
 
 include(mvds)
 
-mvds_add_adapter(a_kstores)
+mvds_add_adapter(a_kstor)

@@ -2,6 +2,7 @@
 #include <kdadm_element.h>
 #include <optional>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <vector>
 
 namespace MvdS {
@@ -13,12 +14,15 @@ namespace ksvc {
 class KeyStoreConfig
 {
 // DATA
+std::string d_backend;
 unsigned long long d_maxCachedObjects = 1000;
 public:
 // CREATORS
 // MANIPULATOR
+std::string& backend() { return d_backend;}
 unsigned long long& maxCachedObjects() { return d_maxCachedObjects;}
 // ACCESSORS
+const std::string& backend() const { return d_backend;}
 const unsigned long long& maxCachedObjects() const { return d_maxCachedObjects;}
 }; // class KeyStoreConfig
 

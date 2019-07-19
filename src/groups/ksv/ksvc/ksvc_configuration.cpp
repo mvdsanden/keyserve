@@ -7,6 +7,24 @@ namespace ksvc {
 
 bool operator>>(const kdadm::Element &element, KeyStoreConfig& obj)
 {
+  { // BEGIN backend
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "backend",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "backend");
+      return false;
+    }
+
+    if (!(**iter >> obj.backend())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
+      return false;
+    }
+  } // END backend
+
   { // BEGIN maxCachedObjects
     auto iter = kdadm::ElementUtils::getElementByTagName(
       "maxCachedObjects",
