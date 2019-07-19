@@ -84,6 +84,76 @@ TEST(MemoryKeyStoreTest, createCryptoKey)
       cryptoKey);
 }
 
+TEST(MemoryKeyStoreTest, getKeyRing)
+{
+  ksvc::KeyStoreConfig config;
+  MemoryKeyStore obj(config);
+
+  std::string parent = "projects/test/locations/A/keyRings";
+  std::string id     = "test";
+  std::string name   = parent + "/" + id;
+
+  ksvc::KeyRing keyRing;
+  keyRing.set_name(name);
+
+  obj.getKeyRing(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_notFound);
+      },
+      name);
+  
+  obj.createKeyRing(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_success);
+        ASSERT_EQ(object->name(), name);
+      },
+      parent,
+      id,
+      keyRing);
+
+  obj.getKeyRing(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_success);
+      },
+      name);
+}
+
+TEST(MemoryKeyStoreTest, getCryptoKey)
+{
+  ksvc::KeyStoreConfig config;
+  MemoryKeyStore obj(config);
+
+  std::string parent = "projects/test/locations/A/cryptoKeys";
+  std::string id     = "test";
+  std::string name   = parent + "/" + id;
+
+  ksvc::CryptoKey cryptoKey;
+  cryptoKey.set_name(name);
+
+  obj.getCryptoKey(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_notFound);
+      },
+      name);
+  
+  obj.createCryptoKey(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_success);
+        ASSERT_EQ(object->name(), name);
+      },
+      parent,
+      id,
+      cryptoKey);
+
+  obj.getCryptoKey(
+      [&](auto status, auto object) {
+        ASSERT_EQ(status, ksvc::ResultStatus::e_success);
+      },
+      name);
+}
+
+
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
