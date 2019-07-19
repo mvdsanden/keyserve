@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package MvdS.ksvc;
+
+enum CryptoKeyVersionAlgorithm {
+     CRYPTO_KEY_VERSION_ALOGRITHM_UNSPECIFIED = 0;
+     SYMMETRIC_ENCRYPTION = 1;
+};

@@ -74,6 +74,8 @@ public:
       return;
     }
 
+    CryptoKeyVersionTemplate versionTemplate = cryptoKey.versionTemplate();
+
     using namespace std::placeholders;
     // d_crypto->createCryptoKey(std::bind(&KeyManager::createCryptoKey,
     //                                     this,
@@ -83,7 +85,7 @@ public:
     //                                     std::move(cryptoKey),
     //                                     _1,
     //                                     _2),
-    //                           cryptoKey);
+    //                           std::move(versionTemplate));
   }
 
   // ACCESSORS

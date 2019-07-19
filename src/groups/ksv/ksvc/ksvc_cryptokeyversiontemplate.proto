@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "ksvc_cryptokeyversionalgorithm.proto";
+
+package MvdS.ksvc;
+
+message CryptoKeyVersionTemplate {
+  CryptoKeyVersionAlgorithm algorithm = 1;
+};

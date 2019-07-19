@@ -8,3 +8,4 @@ ksvc_keyring.pb
 ksvc_cryptokey.pb
 ksvc_cryptokeyversion.pb
 ksvc_resultfunction
+ksvc_crypto
