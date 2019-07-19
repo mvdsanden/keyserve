@@ -21,7 +21,7 @@ namespace a_kstor {
 
 class KeyStoreFactory
 {
-  // ...
+  // Prpvides a factory for key stores.
 
   // TYPES
   typedef std::function<std::unique_ptr<ksvc::KeyStore>()> Factory;
@@ -34,10 +34,12 @@ class KeyStoreFactory
 public:
   // CREATORS
   KeyStoreFactory(const ksvc::KeyStoreConfig &config);
-  // ...
+  // Create key store factor using the specified 'config'.
 
   // MANIPULATORS
   std::unique_ptr<ksvc::KeyStore> create();
+  // Create new key store. Return the key store or nullptr if the configured
+  // type was unknown.
 
   // ACCESSORS
 };

@@ -24,7 +24,9 @@ KeyStoreFactory::KeyStoreFactory(const ksvc::KeyStoreConfig &config)
 // MANIPULATORS
 std::unique_ptr<ksvc::KeyStore> KeyStoreFactory::create()
 {
-  assert(nullptr != d_factory);
+  if (!d_factory) {
+    return nullptr;
+  }
 
   return d_factory();
 }

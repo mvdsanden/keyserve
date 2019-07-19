@@ -2,7 +2,8 @@
 #include <ksvc_commandlineargs.h>
 #include <ksvc_configuration.h>
 #include <ksvc_configurationutil.h>
-// #include <a_kstores_keystorefactory.h>
+#include <ksvc_keystore.h>
+#include <a_kstor_keystorefactory.h>
 // #include <ksrv_cachingkeystore.h>
 // #include <ksrv_servicefactory.h>
 // #include <a_ksrvs_servicefactory.h>
@@ -42,11 +43,11 @@ int main(int argc, char *argv[])
     return 2;
   }
 
-  // a_kstor::KeyStoreFactory        keyStoreFactory(config.keyStore());
-  // std::unique_ptr<ksrv::KeyStore> keyStore = keyStoreFactory.create();
-  // if (!keyStore) {
-  //   return 3;
-  // }
+  a_kstor::KeyStoreFactory        keyStoreFactory(config.keyStore());
+  std::unique_ptr<ksvc::KeyStore> keyStore = keyStoreFactory.create();
+  if (!keyStore) {
+    return 3;
+  }
 
   // if (!keyStore.start()) {
   //   return 4;
