@@ -32,6 +32,7 @@
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
+#include "ksvc_cryptokeyversionalgorithm.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_ksvc_5fcryptokeyversion_2eproto
@@ -190,12 +191,32 @@ class CryptoKeyVersion :
   std::string* release_name();
   void set_allocated_name(std::string* name);
 
+  // string createTime = 3;
+  void clear_createtime();
+  static const int kCreateTimeFieldNumber = 3;
+  const std::string& createtime() const;
+  void set_createtime(const std::string& value);
+  void set_createtime(std::string&& value);
+  void set_createtime(const char* value);
+  void set_createtime(const char* value, size_t size);
+  std::string* mutable_createtime();
+  std::string* release_createtime();
+  void set_allocated_createtime(std::string* createtime);
+
+  // .MvdS.ksvc.CryptoKeyVersionAlgorithm algorithm = 2;
+  void clear_algorithm();
+  static const int kAlgorithmFieldNumber = 2;
+  ::MvdS::ksvc::CryptoKeyVersionAlgorithm algorithm() const;
+  void set_algorithm(::MvdS::ksvc::CryptoKeyVersionAlgorithm value);
+
   // @@protoc_insertion_point(class_scope:MvdS.ksvc.CryptoKeyVersion)
  private:
   class HasBitSetters;
 
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr createtime_;
+  int algorithm_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_ksvc_5fcryptokeyversion_2eproto;
 };
@@ -259,6 +280,71 @@ inline void CryptoKeyVersion::set_allocated_name(std::string* name) {
   }
   name_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name);
   // @@protoc_insertion_point(field_set_allocated:MvdS.ksvc.CryptoKeyVersion.name)
+}
+
+// .MvdS.ksvc.CryptoKeyVersionAlgorithm algorithm = 2;
+inline void CryptoKeyVersion::clear_algorithm() {
+  algorithm_ = 0;
+}
+inline ::MvdS::ksvc::CryptoKeyVersionAlgorithm CryptoKeyVersion::algorithm() const {
+  // @@protoc_insertion_point(field_get:MvdS.ksvc.CryptoKeyVersion.algorithm)
+  return static_cast< ::MvdS::ksvc::CryptoKeyVersionAlgorithm >(algorithm_);
+}
+inline void CryptoKeyVersion::set_algorithm(::MvdS::ksvc::CryptoKeyVersionAlgorithm value) {
+  
+  algorithm_ = value;
+  // @@protoc_insertion_point(field_set:MvdS.ksvc.CryptoKeyVersion.algorithm)
+}
+
+// string createTime = 3;
+inline void CryptoKeyVersion::clear_createtime() {
+  createtime_.ClearToEmptyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline const std::string& CryptoKeyVersion::createtime() const {
+  // @@protoc_insertion_point(field_get:MvdS.ksvc.CryptoKeyVersion.createTime)
+  return createtime_.GetNoArena();
+}
+inline void CryptoKeyVersion::set_createtime(const std::string& value) {
+  
+  createtime_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:MvdS.ksvc.CryptoKeyVersion.createTime)
+}
+inline void CryptoKeyVersion::set_createtime(std::string&& value) {
+  
+  createtime_.SetNoArena(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value));
+  // @@protoc_insertion_point(field_set_rvalue:MvdS.ksvc.CryptoKeyVersion.createTime)
+}
+inline void CryptoKeyVersion::set_createtime(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  createtime_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:MvdS.ksvc.CryptoKeyVersion.createTime)
+}
+inline void CryptoKeyVersion::set_createtime(const char* value, size_t size) {
+  
+  createtime_.SetNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:MvdS.ksvc.CryptoKeyVersion.createTime)
+}
+inline std::string* CryptoKeyVersion::mutable_createtime() {
+  
+  // @@protoc_insertion_point(field_mutable:MvdS.ksvc.CryptoKeyVersion.createTime)
+  return createtime_.MutableNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline std::string* CryptoKeyVersion::release_createtime() {
+  // @@protoc_insertion_point(field_release:MvdS.ksvc.CryptoKeyVersion.createTime)
+  
+  return createtime_.ReleaseNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+inline void CryptoKeyVersion::set_allocated_createtime(std::string* createtime) {
+  if (createtime != nullptr) {
+    
+  } else {
+    
+  }
+  createtime_.SetAllocatedNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), createtime);
+  // @@protoc_insertion_point(field_set_allocated:MvdS.ksvc.CryptoKeyVersion.createTime)
 }
 
 #ifdef __GNUC__

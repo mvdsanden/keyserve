@@ -9,7 +9,6 @@ namespace ksvc {
 // -------------
 
 // CREATORS
-Crypto::Crypto() {}
 
 // MANIPULATORS
 

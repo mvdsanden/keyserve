@@ -2,9 +2,17 @@
 #ifndef INCLUDED_KSVC_CRYPTO
 #define INCLUDED_KSVC_CRYPTO
 
+#include <ksvc_resultfunction.h>
+
+#include <memory>
+
 namespace MvdS {
 namespace ksvc {
 
+// Forward declaration
+class CryptoKeyVersion;
+class CryptoKeyVersionTemplate;
+  
 // =============
 // Class: Crypto
 // =============
@@ -23,8 +31,9 @@ public:
   // CREATORS
 
   // MANIPULATORS
-  void createCryptoKey(ResultFunction<std::shared_ptr<CryptoKeyVersion>> result,
-                       const CryptoKeyVersionTemplate &versionTemplate) = 0;
+  virtual void
+  createCryptoKey(ResultFunction<std::shared_ptr<CryptoKeyVersion>> result,
+                  const CryptoKeyVersionTemplate &versionTemplate) = 0;
   // Create new crypto key version using the specified 'versionTemplate'.
 
   // ACCESSORS

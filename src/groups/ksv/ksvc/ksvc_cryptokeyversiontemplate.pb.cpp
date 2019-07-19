@@ -1,0 +1,1 @@
+ksvc_cryptokeyversiontemplate.pb.cc

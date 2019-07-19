@@ -45,6 +45,28 @@ bool operator>>(const kdadm::Element &element, KeyStoreConfig& obj)
 
   return true;
 }
+bool operator>>(const kdadm::Element &element, CryptoConfig& obj)
+{
+  { // BEGIN backend
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "backend",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "backend");
+      return false;
+    }
+
+    if (!(**iter >> obj.backend())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
+      return false;
+    }
+  } // END backend
+
+  return true;
+}
 bool operator>>(const kdadm::Element &element, Configuration& obj)
 {
   { // BEGIN keyStore
@@ -64,6 +86,24 @@ bool operator>>(const kdadm::Element &element, Configuration& obj)
       return false;
     }
   } // END keyStore
+
+  { // BEGIN crypto
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "crypto",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "crypto");
+      return false;
+    }
+
+    if (!(**iter >> obj.crypto())) {
+      spdlog::error("{}: expected CryptoConfig value", (*iter)->location());
+      return false;
+    }
+  } // END crypto
 
   return true;
 }

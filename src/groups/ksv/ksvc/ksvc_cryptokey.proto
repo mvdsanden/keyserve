@@ -1,10 +1,12 @@
 syntax = "proto3";
 
 import "ksvc_cryptokeyversion.proto";
+import "ksvc_cryptokeyversiontemplate.proto";
 
 package MvdS.ksvc;
 
 message CryptoKey {
   string name = 1;
   CryptoKeyVersion primary = 2;
+  CryptoKeyVersionTemplate versionTemplate = 3;
 };

@@ -2,7 +2,7 @@
 #include <ksvc_keymanager.h>
 #include <ksvc_keystore.h>
 #include <ksvc_cryptokey.pb.h>
-#include <ksvc_cryptokeyversion.pb.h>
+#include <ksvc_cryptokeyversiontemplate.pb.h>
 #include <ksvc_keyring.pb.h>
 
 namespace MvdS {
@@ -74,7 +74,7 @@ public:
       return;
     }
 
-    CryptoKeyVersionTemplate versionTemplate = cryptoKey.versionTemplate();
+    CryptoKeyVersionTemplate versionTemplate = cryptoKey.versiontemplate();
 
     using namespace std::placeholders;
     // d_crypto->createCryptoKey(std::bind(&KeyManager::createCryptoKey,

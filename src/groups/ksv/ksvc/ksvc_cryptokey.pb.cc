@@ -16,6 +16,7 @@
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 extern PROTOBUF_INTERNAL_EXPORT_ksvc_5fcryptokeyversion_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CryptoKeyVersion_ksvc_5fcryptokeyversion_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_ksvc_5fcryptokeyversiontemplate_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CryptoKeyVersionTemplate_ksvc_5fcryptokeyversiontemplate_2eproto;
 namespace MvdS {
 namespace ksvc {
 class CryptoKeyDefaultTypeInternal {
@@ -35,9 +36,10 @@ static void InitDefaultsscc_info_CryptoKey_ksvc_5fcryptokey_2eproto() {
   ::MvdS::ksvc::CryptoKey::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_CryptoKey_ksvc_5fcryptokey_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, InitDefaultsscc_info_CryptoKey_ksvc_5fcryptokey_2eproto}, {
-      &scc_info_CryptoKeyVersion_ksvc_5fcryptokeyversion_2eproto.base,}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_CryptoKey_ksvc_5fcryptokey_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, InitDefaultsscc_info_CryptoKey_ksvc_5fcryptokey_2eproto}, {
+      &scc_info_CryptoKeyVersion_ksvc_5fcryptokeyversion_2eproto.base,
+      &scc_info_CryptoKeyVersionTemplate_ksvc_5fcryptokeyversiontemplate_2eproto.base,}};
 
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_ksvc_5fcryptokey_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_ksvc_5fcryptokey_2eproto = nullptr;
@@ -51,6 +53,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_ksvc_5fcryptokey_2eproto::offs
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::MvdS::ksvc::CryptoKey, name_),
   PROTOBUF_FIELD_OFFSET(::MvdS::ksvc::CryptoKey, primary_),
+  PROTOBUF_FIELD_OFFSET(::MvdS::ksvc::CryptoKey, versiontemplate_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::MvdS::ksvc::CryptoKey)},
@@ -62,12 +65,16 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_ksvc_5fcryptokey_2eproto[] =
   "\n\024ksvc_cryptokey.proto\022\tMvdS.ksvc\032\033ksvc_"
-  "cryptokeyversion.proto\"G\n\tCryptoKey\022\014\n\004n"
-  "ame\030\001 \001(\t\022,\n\007primary\030\002 \001(\0132\033.MvdS.ksvc.C"
-  "ryptoKeyVersionb\006proto3"
+  "cryptokeyversion.proto\032#ksvc_cryptokeyve"
+  "rsiontemplate.proto\"\205\001\n\tCryptoKey\022\014\n\004nam"
+  "e\030\001 \001(\t\022,\n\007primary\030\002 \001(\0132\033.MvdS.ksvc.Cry"
+  "ptoKeyVersion\022<\n\017versionTemplate\030\003 \001(\0132#"
+  ".MvdS.ksvc.CryptoKeyVersionTemplateb\006pro"
+  "to3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_ksvc_5fcryptokey_2eproto_deps[1] = {
+static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_ksvc_5fcryptokey_2eproto_deps[2] = {
   &::descriptor_table_ksvc_5fcryptokeyversion_2eproto,
+  &::descriptor_table_ksvc_5fcryptokeyversiontemplate_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_ksvc_5fcryptokey_2eproto_sccs[1] = {
   &scc_info_CryptoKey_ksvc_5fcryptokey_2eproto.base,
@@ -75,8 +82,8 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_ksv
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_ksvc_5fcryptokey_2eproto_once;
 static bool descriptor_table_ksvc_5fcryptokey_2eproto_initialized = false;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_ksvc_5fcryptokey_2eproto = {
-  &descriptor_table_ksvc_5fcryptokey_2eproto_initialized, descriptor_table_protodef_ksvc_5fcryptokey_2eproto, "ksvc_cryptokey.proto", 143,
-  &descriptor_table_ksvc_5fcryptokey_2eproto_once, descriptor_table_ksvc_5fcryptokey_2eproto_sccs, descriptor_table_ksvc_5fcryptokey_2eproto_deps, 1, 1,
+  &descriptor_table_ksvc_5fcryptokey_2eproto_initialized, descriptor_table_protodef_ksvc_5fcryptokey_2eproto, "ksvc_cryptokey.proto", 243,
+  &descriptor_table_ksvc_5fcryptokey_2eproto_once, descriptor_table_ksvc_5fcryptokey_2eproto_sccs, descriptor_table_ksvc_5fcryptokey_2eproto_deps, 1, 2,
   schemas, file_default_instances, TableStruct_ksvc_5fcryptokey_2eproto::offsets,
   file_level_metadata_ksvc_5fcryptokey_2eproto, 1, file_level_enum_descriptors_ksvc_5fcryptokey_2eproto, file_level_service_descriptors_ksvc_5fcryptokey_2eproto,
 };
@@ -91,15 +98,22 @@ namespace ksvc {
 void CryptoKey::InitAsDefaultInstance() {
   ::MvdS::ksvc::_CryptoKey_default_instance_._instance.get_mutable()->primary_ = const_cast< ::MvdS::ksvc::CryptoKeyVersion*>(
       ::MvdS::ksvc::CryptoKeyVersion::internal_default_instance());
+  ::MvdS::ksvc::_CryptoKey_default_instance_._instance.get_mutable()->versiontemplate_ = const_cast< ::MvdS::ksvc::CryptoKeyVersionTemplate*>(
+      ::MvdS::ksvc::CryptoKeyVersionTemplate::internal_default_instance());
 }
 class CryptoKey::HasBitSetters {
  public:
   static const ::MvdS::ksvc::CryptoKeyVersion& primary(const CryptoKey* msg);
+  static const ::MvdS::ksvc::CryptoKeyVersionTemplate& versiontemplate(const CryptoKey* msg);
 };
 
 const ::MvdS::ksvc::CryptoKeyVersion&
 CryptoKey::HasBitSetters::primary(const CryptoKey* msg) {
   return *msg->primary_;
+}
+const ::MvdS::ksvc::CryptoKeyVersionTemplate&
+CryptoKey::HasBitSetters::versiontemplate(const CryptoKey* msg) {
+  return *msg->versiontemplate_;
 }
 void CryptoKey::clear_primary() {
   if (GetArenaNoVirtual() == nullptr && primary_ != nullptr) {
@@ -107,9 +121,16 @@ void CryptoKey::clear_primary() {
   }
   primary_ = nullptr;
 }
+void CryptoKey::clear_versiontemplate() {
+  if (GetArenaNoVirtual() == nullptr && versiontemplate_ != nullptr) {
+    delete versiontemplate_;
+  }
+  versiontemplate_ = nullptr;
+}
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int CryptoKey::kNameFieldNumber;
 const int CryptoKey::kPrimaryFieldNumber;
+const int CryptoKey::kVersionTemplateFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 CryptoKey::CryptoKey()
@@ -130,13 +151,20 @@ CryptoKey::CryptoKey(const CryptoKey& from)
   } else {
     primary_ = nullptr;
   }
+  if (from.has_versiontemplate()) {
+    versiontemplate_ = new ::MvdS::ksvc::CryptoKeyVersionTemplate(*from.versiontemplate_);
+  } else {
+    versiontemplate_ = nullptr;
+  }
   // @@protoc_insertion_point(copy_constructor:MvdS.ksvc.CryptoKey)
 }
 
 void CryptoKey::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_CryptoKey_ksvc_5fcryptokey_2eproto.base);
   name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  primary_ = nullptr;
+  ::memset(&primary_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&versiontemplate_) -
+      reinterpret_cast<char*>(&primary_)) + sizeof(versiontemplate_));
 }
 
 CryptoKey::~CryptoKey() {
@@ -147,6 +175,7 @@ CryptoKey::~CryptoKey() {
 void CryptoKey::SharedDtor() {
   name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (this != internal_default_instance()) delete primary_;
+  if (this != internal_default_instance()) delete versiontemplate_;
 }
 
 void CryptoKey::SetCachedSize(int size) const {
@@ -169,6 +198,10 @@ void CryptoKey::Clear() {
     delete primary_;
   }
   primary_ = nullptr;
+  if (GetArenaNoVirtual() == nullptr && versiontemplate_ != nullptr) {
+    delete versiontemplate_;
+  }
+  versiontemplate_ = nullptr;
   _internal_metadata_.Clear();
 }
 
@@ -191,6 +224,13 @@ const char* CryptoKey::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           ptr = ctx->ParseMessage(mutable_primary(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(mutable_versiontemplate(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -250,6 +290,17 @@ bool CryptoKey::MergePartialFromCodedStream(
         break;
       }
 
+      // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+      case 3: {
+        if (static_cast< ::PROTOBUF_NAMESPACE_ID::uint8>(tag) == (26 & 0xFF)) {
+          DO_(::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::ReadMessage(
+               input, mutable_versiontemplate()));
+        } else {
+          goto handle_unusual;
+        }
+        break;
+      }
+
       default: {
       handle_unusual:
         if (tag == 0) {
@@ -293,6 +344,12 @@ void CryptoKey::SerializeWithCachedSizes(
       2, HasBitSetters::primary(this), output);
   }
 
+  // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+  if (this->has_versiontemplate()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteMessageMaybeToArray(
+      3, HasBitSetters::versiontemplate(this), output);
+  }
+
   if (_internal_metadata_.have_unknown_fields()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SerializeUnknownFields(
         _internal_metadata_.unknown_fields(), output);
@@ -322,6 +379,13 @@ void CryptoKey::SerializeWithCachedSizes(
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessageToArray(
         2, HasBitSetters::primary(this), target);
+  }
+
+  // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+  if (this->has_versiontemplate()) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessageToArray(
+        3, HasBitSetters::versiontemplate(this), target);
   }
 
   if (_internal_metadata_.have_unknown_fields()) {
@@ -359,6 +423,13 @@ size_t CryptoKey::ByteSizeLong() const {
         *primary_);
   }
 
+  // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+  if (this->has_versiontemplate()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *versiontemplate_);
+  }
+
   int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
   SetCachedSize(cached_size);
   return total_size;
@@ -393,6 +464,9 @@ void CryptoKey::MergeFrom(const CryptoKey& from) {
   if (from.has_primary()) {
     mutable_primary()->::MvdS::ksvc::CryptoKeyVersion::MergeFrom(from.primary());
   }
+  if (from.has_versiontemplate()) {
+    mutable_versiontemplate()->::MvdS::ksvc::CryptoKeyVersionTemplate::MergeFrom(from.versiontemplate());
+  }
 }
 
 void CryptoKey::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -423,6 +497,7 @@ void CryptoKey::InternalSwap(CryptoKey* other) {
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
     GetArenaNoVirtual());
   swap(primary_, other->primary_);
+  swap(versiontemplate_, other->versiontemplate_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CryptoKey::GetMetadata() const {

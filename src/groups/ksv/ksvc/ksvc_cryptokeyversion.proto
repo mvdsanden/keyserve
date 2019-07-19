@@ -1,7 +1,11 @@
 syntax = "proto3";
 
+import "ksvc_cryptokeyversionalgorithm.proto";
+
 package MvdS.ksvc;
 
 message CryptoKeyVersion {
   string name = 1;
+  CryptoKeyVersionAlgorithm algorithm = 2;
+  string createTime = 3; 
 };

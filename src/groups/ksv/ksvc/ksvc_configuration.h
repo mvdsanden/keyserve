@@ -33,6 +33,28 @@ const unsigned long long& maxCachedObjects() const { return d_maxCachedObjects;}
 // --------------------
 
 bool operator>>(const kdadm::Element &element, KeyStoreConfig& obj);
+// ------------------
+// class CryptoConfig
+// ------------------
+class CryptoConfig
+{
+// DATA
+std::string d_backend;
+public:
+// CREATORS
+// MANIPULATOR
+std::string& backend() { return d_backend;}
+// ACCESSORS
+const std::string& backend() const { return d_backend;}
+}; // class CryptoConfig
+
+// --- inline methods ---
+
+// ------------------
+// Class CryptoConfig
+// ------------------
+
+bool operator>>(const kdadm::Element &element, CryptoConfig& obj);
 // -------------------
 // class Configuration
 // -------------------
@@ -40,12 +62,15 @@ class Configuration
 {
 // DATA
 KeyStoreConfig d_keyStore;
+CryptoConfig d_crypto;
 public:
 // CREATORS
 // MANIPULATOR
 KeyStoreConfig& keyStore() { return d_keyStore;}
+CryptoConfig& crypto() { return d_crypto;}
 // ACCESSORS
 const KeyStoreConfig& keyStore() const { return d_keyStore;}
+const CryptoConfig& crypto() const { return d_crypto;}
 }; // class Configuration
 
 // --- inline methods ---

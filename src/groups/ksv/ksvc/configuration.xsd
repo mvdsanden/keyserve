@@ -10,10 +10,17 @@
       <xs:element name='maxCachedObjects' type='xs:unsigned' default='1000'/>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name='CryptoConfig'>
+    <xs:sequence>
+      <xs:element name='backend' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
   
   <xs:complexType name='Configuration'>
     <xs:sequence>
       <xs:element name="keyStore" type="KeyStoreConfig"/>
+      <xs:element name="crypto" type="CryptoConfig"/>
     </xs:sequence>
   </xs:complexType>
 

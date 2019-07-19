@@ -28,7 +28,7 @@ std::unique_ptr<ksvc::KeyStore> KeyStoreFactory::create()
     return nullptr;
   }
 
-  return d_factory();
+  return std::move(d_factory());
 }
 
 // ACCESSORS

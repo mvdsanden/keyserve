@@ -33,6 +33,7 @@
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
 #include <google/protobuf/unknown_field_set.h>
 #include "ksvc_cryptokeyversion.pb.h"
+#include "ksvc_cryptokeyversiontemplate.pb.h"
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_ksvc_5fcryptokey_2eproto
@@ -200,6 +201,15 @@ class CryptoKey :
   ::MvdS::ksvc::CryptoKeyVersion* mutable_primary();
   void set_allocated_primary(::MvdS::ksvc::CryptoKeyVersion* primary);
 
+  // .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+  bool has_versiontemplate() const;
+  void clear_versiontemplate();
+  static const int kVersionTemplateFieldNumber = 3;
+  const ::MvdS::ksvc::CryptoKeyVersionTemplate& versiontemplate() const;
+  ::MvdS::ksvc::CryptoKeyVersionTemplate* release_versiontemplate();
+  ::MvdS::ksvc::CryptoKeyVersionTemplate* mutable_versiontemplate();
+  void set_allocated_versiontemplate(::MvdS::ksvc::CryptoKeyVersionTemplate* versiontemplate);
+
   // @@protoc_insertion_point(class_scope:MvdS.ksvc.CryptoKey)
  private:
   class HasBitSetters;
@@ -207,6 +217,7 @@ class CryptoKey :
   ::PROTOBUF_NAMESPACE_ID::internal::InternalMetadataWithArena _internal_metadata_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::MvdS::ksvc::CryptoKeyVersion* primary_;
+  ::MvdS::ksvc::CryptoKeyVersionTemplate* versiontemplate_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_ksvc_5fcryptokey_2eproto;
 };
@@ -315,6 +326,51 @@ inline void CryptoKey::set_allocated_primary(::MvdS::ksvc::CryptoKeyVersion* pri
   }
   primary_ = primary;
   // @@protoc_insertion_point(field_set_allocated:MvdS.ksvc.CryptoKey.primary)
+}
+
+// .MvdS.ksvc.CryptoKeyVersionTemplate versionTemplate = 3;
+inline bool CryptoKey::has_versiontemplate() const {
+  return this != internal_default_instance() && versiontemplate_ != nullptr;
+}
+inline const ::MvdS::ksvc::CryptoKeyVersionTemplate& CryptoKey::versiontemplate() const {
+  const ::MvdS::ksvc::CryptoKeyVersionTemplate* p = versiontemplate_;
+  // @@protoc_insertion_point(field_get:MvdS.ksvc.CryptoKey.versionTemplate)
+  return p != nullptr ? *p : *reinterpret_cast<const ::MvdS::ksvc::CryptoKeyVersionTemplate*>(
+      &::MvdS::ksvc::_CryptoKeyVersionTemplate_default_instance_);
+}
+inline ::MvdS::ksvc::CryptoKeyVersionTemplate* CryptoKey::release_versiontemplate() {
+  // @@protoc_insertion_point(field_release:MvdS.ksvc.CryptoKey.versionTemplate)
+  
+  ::MvdS::ksvc::CryptoKeyVersionTemplate* temp = versiontemplate_;
+  versiontemplate_ = nullptr;
+  return temp;
+}
+inline ::MvdS::ksvc::CryptoKeyVersionTemplate* CryptoKey::mutable_versiontemplate() {
+  
+  if (versiontemplate_ == nullptr) {
+    auto* p = CreateMaybeMessage<::MvdS::ksvc::CryptoKeyVersionTemplate>(GetArenaNoVirtual());
+    versiontemplate_ = p;
+  }
+  // @@protoc_insertion_point(field_mutable:MvdS.ksvc.CryptoKey.versionTemplate)
+  return versiontemplate_;
+}
+inline void CryptoKey::set_allocated_versiontemplate(::MvdS::ksvc::CryptoKeyVersionTemplate* versiontemplate) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaNoVirtual();
+  if (message_arena == nullptr) {
+    delete reinterpret_cast< ::PROTOBUF_NAMESPACE_ID::MessageLite*>(versiontemplate_);
+  }
+  if (versiontemplate) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena = nullptr;
+    if (message_arena != submessage_arena) {
+      versiontemplate = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, versiontemplate, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  versiontemplate_ = versiontemplate;
+  // @@protoc_insertion_point(field_set_allocated:MvdS.ksvc.CryptoKey.versionTemplate)
 }
 
 #ifdef __GNUC__

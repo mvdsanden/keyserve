@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
   //   return 4;
   // }
 
-  // a_kscry::CryptoFactory cryptoFactory(config);
+  // a_kscrypto::CryptoFactory cryptoFactory(config);
   // std::unique_ptr<ksrv::Crypto> crypto = cryptoFactory.create();
   // if (!crypto) {
   //   return 5;

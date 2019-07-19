@@ -7,5 +7,7 @@ ksvc_cachingkeystore
 ksvc_keyring.pb
 ksvc_cryptokey.pb
 ksvc_cryptokeyversion.pb
+ksvc_cryptokeyversiontemplate.pb
+ksvc_cryptokeyversionalgorithm.pb
 ksvc_resultfunction
 ksvc_crypto
