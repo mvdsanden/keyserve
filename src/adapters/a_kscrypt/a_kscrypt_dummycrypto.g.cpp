@@ -3,6 +3,9 @@
 
 #include <ksvc_configuration.h>
 
+#include <ksvc_cryptokeyversiontemplate.pb.h>
+#include <ksvc_cryptokeyversion.pb.h>
+
 #include <gtest/gtest.h>
 
 using namespace MvdS;
@@ -19,6 +22,28 @@ TEST(DummyCryptoTest, Constructor)
   //   Construct the object.
   ksvc::CryptoConfig config;
   DummyCrypto obj(config);
+}
+
+TEST(DummyCryptoTest, createCryptoKey)
+{
+  ksvc::CryptoConfig config;
+  DummyCrypto        obj(config);
+
+  std::array<ksvc::CryptoKeyVersionAlgorithm, 2> algos = {
+      ksvc::CRYPTO_KEY_VERSION_ALOGRITHM_UNSPECIFIED,
+      ksvc::SYMMETRIC_ENCRYPTION};
+
+  for (auto algorithm : algos) {
+    ksvc::CryptoKeyVersionTemplate versionTemplate;
+    versionTemplate.set_algorithm(algorithm);
+
+    obj.createCryptoKey(
+        [&](auto status, auto cryptoKeyVersion) {
+          ASSERT_EQ(status, ksvc::ResultStatus::e_success);
+          ASSERT_EQ(cryptoKeyVersion->algorithm(), versionTemplate.algorithm());
+        },
+        versionTemplate);
+  }
 }
 
 int main(int argc, char **argv)

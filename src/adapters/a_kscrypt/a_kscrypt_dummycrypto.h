@@ -37,7 +37,7 @@ public:
   // MANIPULATORS
   void createCryptoKey(
       ksvc::ResultFunction<std::shared_ptr<ksvc::CryptoKeyVersion>> result,
-      const ksvc::CryptoKeyVersionTemplate &versionTemplate) override;
+      ksvc::CryptoKeyVersionTemplate versionTemplate) override;
   // Create new crypto key version using the specified 'versionTemplate'.
 
   // ACCESSORS

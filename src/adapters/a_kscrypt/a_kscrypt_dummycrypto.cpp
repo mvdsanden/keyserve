@@ -21,13 +21,15 @@ DummyCrypto::DummyCrypto(const ksvc::CryptoConfig &config) {}
 // MANIPULATORS
 void DummyCrypto::createCryptoKey(
     ksvc::ResultFunction<std::shared_ptr<ksvc::CryptoKeyVersion>> result,
-    const ksvc::CryptoKeyVersionTemplate &versionTemplate)
+    ksvc::CryptoKeyVersionTemplate versionTemplate)
 {
   using TimeUtil = google::protobuf::util::TimeUtil;
   
-  ksvc::CryptoKeyVersion version;
-  version.set_algorithm(versionTemplate.algorithm());
-  version.set_createtime(TimeUtil::ToString(TimeUtil::GetCurrentTime()));
+  auto version = std::make_shared<ksvc::CryptoKeyVersion>();
+  version->set_algorithm(versionTemplate.algorithm());
+  version->set_createtime(TimeUtil::ToString(TimeUtil::GetCurrentTime()));
+
+  result(ksvc::ResultStatus::e_success, std::move(version));
 }
 
 // ACCESSORS

@@ -33,7 +33,7 @@ public:
   // MANIPULATORS
   virtual void
   createCryptoKey(ResultFunction<std::shared_ptr<CryptoKeyVersion>> result,
-                  const CryptoKeyVersionTemplate &versionTemplate) = 0;
+                  CryptoKeyVersionTemplate versionTemplate) = 0;
   // Create new crypto key version using the specified 'versionTemplate'.
 
   // ACCESSORS

@@ -1,6 +1,7 @@
 // ksvc_keymanager.cpp                                                -*-c++-*-
 #include <ksvc_keymanager.h>
 #include <ksvc_keystore.h>
+#include <ksvc_crypto.h>
 #include <ksvc_cryptokey.pb.h>
 #include <ksvc_cryptokeyversiontemplate.pb.h>
 #include <ksvc_keyring.pb.h>
@@ -20,12 +21,13 @@ class KeyManagerImpl : public KeyManager
   Crypto *  d_crypto;
 
   // PRIVATE MANIPULATORS
-  void createCryptoKey(ResultFunction<std::shared_ptr<CryptoKey>> result,
-                       std::string                                parent,
-                       std::string                                cryptoKeyId,
-                       CryptoKey                                  cryptoKey,
-                       const ResultStatus &                       versionStatus,
-                       std::shared_ptr<CryptoKeyVersion>          version)
+  void
+  createCryptoKeyWithVersion(ResultFunction<std::shared_ptr<CryptoKey>> result,
+                             std::string                                parent,
+                             std::string                       cryptoKeyId,
+                             CryptoKey                         cryptoKey,
+                             const ResultStatus &              versionStatus,
+                             std::shared_ptr<CryptoKeyVersion> version)
   {
     if (!versionStatus.isSuccess()) {
       result(versionStatus, nullptr);
@@ -65,27 +67,27 @@ public:
                        bool skipInitialVersionCreation = false)
   {
     if (skipInitialVersionCreation) {
-      createCryptoKey(std::move(result),
-                      std::move(parent),
-                      std::move(cryptoKeyId),
-                      std::move(cryptoKey),
-                      ResultStatus::e_success,
-                      nullptr);
+      createCryptoKeyWithVersion(std::move(result),
+                                 std::move(parent),
+                                 std::move(cryptoKeyId),
+                                 std::move(cryptoKey),
+                                 ResultStatus::e_success,
+                                 nullptr);
       return;
     }
 
     CryptoKeyVersionTemplate versionTemplate = cryptoKey.versiontemplate();
 
     using namespace std::placeholders;
-    // d_crypto->createCryptoKey(std::bind(&KeyManager::createCryptoKey,
-    //                                     this,
-    //                                     std::move(result),
-    //                                     std::move(parent),
-    //                                     std::move(cryptoKeyId),
-    //                                     std::move(cryptoKey),
-    //                                     _1,
-    //                                     _2),
-    //                           std::move(versionTemplate));
+    d_crypto->createCryptoKey(std::bind(&KeyManagerImpl::createCryptoKeyWithVersion,
+                                        this,
+                                        std::move(result),
+                                        std::move(parent),
+                                        std::move(cryptoKeyId),
+                                        std::move(cryptoKey),
+                                        _1,
+                                        _2),
+                              std::move(versionTemplate));
   }
 
   // ACCESSORS
