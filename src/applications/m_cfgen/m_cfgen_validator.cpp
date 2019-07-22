@@ -14,6 +14,7 @@ namespace {
 std::pair<std::string, std::shared_ptr<kdadm::Element>>
 internalType(const std::string &               name,
              const std::string &               cppName,
+	     const std::string &               quote = "",
              const std::optional<std::string> &cppInclude = std::nullopt)
 {
   auto root = kdadm::Element::createElement("xs:internalType");
@@ -22,6 +23,7 @@ internalType(const std::string &               name,
   auto cpp =
       root->children().emplace_back(kdadm::Element::createElement("xs:cpp"));
   cpp->attributes().emplace_back("type", cppName);
+  cpp->attributes().emplace_back("quote", quote);
 
   if (cppInclude) {
     cpp->attributes().emplace_back("include", *cppInclude);
@@ -47,7 +49,7 @@ struct ValidationContext
   // CREATORS
   ValidationContext()
   {
-    d_complexTypes.insert(internalType("xs:string", "std::string", "string"));
+    d_complexTypes.insert(internalType("xs:string", "std::string", "\"", "string"));
     d_complexTypes.insert(internalType("xs:integer", "long long"));
     d_complexTypes.insert(internalType("xs:unsigned", "unsigned long long"));
     d_complexTypes.insert(internalType("xs:boolean", "bool"));

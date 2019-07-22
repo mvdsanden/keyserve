@@ -39,7 +39,7 @@ bool operator>>(const kdadm::Element &element, KeyStoreConfig& obj);
 class CryptoConfig
 {
 // DATA
-std::string d_backend;
+std::string d_backend = "dummy";
 public:
 // CREATORS
 // MANIPULATOR

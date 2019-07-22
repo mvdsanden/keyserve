@@ -1,6 +1,6 @@
 // a_kscrypt_cryptofactory.t.cpp                                      -*-c++-*-
 #include <a_kscrypt_cryptofactory.h>
-
+#include <ksvc_crypto.h>
 #include <ksvc_configuration.h>
 
 #include <gtest/gtest.h>
@@ -20,6 +20,16 @@ TEST(CryptoFactoryTest, Constructor)
   ksvc::CryptoConfig config;
   CryptoFactory obj(config);
 }
+
+TEST(CryptoFactoryTest, createDummy)
+{
+  ksvc::CryptoConfig config;
+  config.backend() = "dummy";
+  CryptoFactory factory(config);
+  auto          obj = factory.create();
+  ASSERT_NE(obj, nullptr);
+}
+
 
 int main(int argc, char **argv)
 {

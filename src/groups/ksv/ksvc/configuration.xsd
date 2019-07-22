@@ -13,7 +13,7 @@
 
   <xs:complexType name='CryptoConfig'>
     <xs:sequence>
-      <xs:element name='backend' type='xs:string'/>
+      <xs:element name='backend' type='xs:string' default='dummy'/>
     </xs:sequence>
   </xs:complexType>
   
