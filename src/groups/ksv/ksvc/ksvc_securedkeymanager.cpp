@@ -8,8 +8,20 @@ namespace ksvc {
 // Class: SecuredKeyManager
 // ------------------------
 
+// PRIVATE MANIPULATORS
+std::unique_ptr<SecuredKeyManagerSession>
+SecuredKeyManager::createSession(const SecurityContext &securityContext)
+{
+  return std::make_unique<SecuredKeyManagerSession>(securityContext,
+                                                    keyManager);
+}
+
+  
 // CREATORS
-SecuredKeyManager::SecuredKeyManager() {}
+SecuredKeyManager::SecuredKeyManager(KeyManager *         keyManager,
+                                     const Configuration &config)
+    : d_keyManager(keyManager)
+{}
 
 // MANIPULATORS
 

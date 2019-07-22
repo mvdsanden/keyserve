@@ -2,9 +2,17 @@
 #ifndef INCLUDED_KSVC_SECUREDKEYMANAGERSESSION
 #define INCLUDED_KSVC_SECUREDKEYMANAGERSESSION
 
+#include <ksvc_keymanager.h>
+
+#include <ksvc_keyring.pb.h>
+#include <ksvc_cryptokey.pb.h>
+
 namespace MvdS {
 namespace ksvc {
 
+// Forward declaration.
+class SecurityContext;
+  
 // ===============================
 // Class: SecuredKeyManagerSession
 // ===============================
@@ -35,7 +43,8 @@ public:
   // CREATORS
   SecuredKeyManagerSession(const SecurityContext &securityContext,
                            KeyManager *           keyManager);
-  // ...
+  // Create secured key manager session using the specified 'securityContext'
+  // and the specified 'keyManager'.
 
   // MANIPULATORS
   void createKeyRing(ResultFunction<std::shared_ptr<KeyRing>> result,
@@ -70,11 +79,12 @@ public:
   {
     if (!validateCreateCryptoKey(
             parent, cryptoKeyId, cryptoKey, skipInitialVersionCreation)) {
-      result(ResultStates::e_denied, nullptr);
+      result(ResultStatus::e_denied, nullptr);
       return;
     }
 
-    d_keyManager->createCryptoKey(std::move(parent),
+    d_keyManager->createCryptoKey(std::move(result),
+                                  std::move(parent),
                                   std::move(cryptoKeyId),
                                   std::move(cryptoKey),
                                   skipInitialVersionCreation);

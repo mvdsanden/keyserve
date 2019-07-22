@@ -21,8 +21,8 @@ struct ResultStatus
     e_notFound,
     e_timedOut,
     e_waiting,
-    e_exists
-
+    e_exists,
+    e_denied
   };
 
   // DATA

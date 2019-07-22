@@ -11,3 +11,5 @@ ksvc_cryptokeyversiontemplate.pb
 ksvc_cryptokeyversionalgorithm.pb
 ksvc_resultfunction
 ksvc_crypto
+ksvc_securitycontext
+ksvc_securedkeymanagersession
