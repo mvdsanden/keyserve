@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
   //   return 4;
   // }
 
-  a_kscrypt::CryptoFactory     cryptoFactory(config.crypto());
+  a_kscrypt::CryptoFactory      cryptoFactory(config.crypto());
   std::unique_ptr<ksvc::Crypto> crypto = cryptoFactory.create();
   if (!crypto) {
     return 5;
