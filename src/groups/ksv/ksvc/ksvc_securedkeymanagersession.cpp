@@ -22,7 +22,7 @@ template <class T>
 using PipelineCall = InternalCall<ResultFunction<std::shared_ptr<T>>>;
 
 template <class ResultType, class CallType>
-void pipeline(ResultType result, CallType call, bool status = true)
+void validationPipeline(ResultType result, CallType call, bool status = true)
 {
   if (!status) {
     result(ResultStatus::e_denied, nullptr);
@@ -36,7 +36,7 @@ template <class ResultType,
           class CallType,
           class Validator,
           class... Validators>
-void pipeline(ResultType result,
+void validationPipeline(ResultType result,
               CallType   call,
               Validator  validator,
               Validators... remaining,
@@ -55,7 +55,7 @@ void pipeline(ResultType result,
     return;
   }
 
-  validator(std::bind(&pipeline<ResultType, CallType, Validators...>,
+  validator(std::bind(&validationPipeline<ResultType, CallType, Validators...>,
                       std::move(result),
                       std::move(call),
                       std::move(remaining)...,
@@ -98,7 +98,7 @@ void SecuredKeyManagerSession::createKeyRing(
                                          std::move(keyRingId),
                                          std::move(keyRing));
 
-  pipeline(
+  validationPipeline(
       std::move(result),
       std::move(call),
       std::bind(
@@ -127,7 +127,7 @@ void SecuredKeyManagerSession::createCryptoKey(
                                            std::move(cryptoKey),
                                            skipInitialVersionCreation);
 
-  pipeline(
+  validationPipeline(
       std::move(result),
       std::move(call),
       std::bind(
