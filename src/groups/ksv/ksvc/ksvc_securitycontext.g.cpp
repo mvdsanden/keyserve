@@ -6,6 +6,18 @@
 using namespace MvdS;
 using namespace MvdS::ksvc;
 
+class TestingSecurityContext : public SecurityContext
+{  
+public:
+  bool d_result = true;
+
+  virtual void validateParent(std::function<void(bool)> result,
+                              std::string               parent) const
+  {
+    result(d_result);
+  }
+};
+
 TEST(SecurityContextTest, Constructor)
 {
   // TEST CONSTRUCTOR
@@ -15,7 +27,7 @@ TEST(SecurityContextTest, Constructor)
   //
   // Test plan:
   //   Construct the object.
-  SecurityContext obj;
+  TestingSecurityContext obj;
 }
 
 int main(int argc, char **argv)

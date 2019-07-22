@@ -2,6 +2,8 @@
 #ifndef INCLUDED_KSVC_SECURITYCONTEXT
 #define INCLUDED_KSVC_SECURITYCONTEXT
 
+#include <functional>
+
 namespace MvdS {
 namespace ksvc {
 
@@ -27,6 +29,10 @@ public:
   // MANIPULATORS
 
   // ACCESSORS
+  virtual void validateParent(std::function<void(bool)> result,
+                              std::string               parent) const = 0;
+  // Validate the specified 'parent'. The specified 'result' callback is called
+  // sometime in the near future with the validation result.
 };
 
 } // namespace ksvc

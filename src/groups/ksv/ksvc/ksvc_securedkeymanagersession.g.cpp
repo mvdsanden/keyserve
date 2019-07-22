@@ -192,6 +192,18 @@ public:
   }
 };
 
+class TestingSecurityContext : public SecurityContext
+{  
+public:
+  bool d_result = true;
+
+  virtual void validateParent(std::function<void(bool)> result,
+                              std::string               parent) const
+  {
+    result(d_result);
+  }
+};
+
 TEST(SecuredKeyManagerSessionTest, Constructor)
 {
   // TEST CONSTRUCTOR
@@ -206,7 +218,7 @@ TEST(SecuredKeyManagerSessionTest, Constructor)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  SecurityContext          securityContext;
+  TestingSecurityContext   securityContext;
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 }
 
@@ -217,7 +229,7 @@ TEST(SecuredKeyManagerSessionTest, createKeyRing)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  SecurityContext          securityContext;
+  TestingSecurityContext   securityContext;
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 
   std::string parent = "projects/test/locations/A/keyRings";
@@ -250,7 +262,7 @@ TEST(SecuredKeyManagerSessionTest, createCryptoKey)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  SecurityContext          securityContext;
+  TestingSecurityContext   securityContext;
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 
   std::string parent = "projects/test/locations/A/cryptoKeys";
