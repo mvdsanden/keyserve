@@ -148,7 +148,9 @@ public:
 // ----------------------
 
 // CREATORS
-CommandlineArgs::CommandlineArgs() {}
+CommandlineArgs::CommandlineArgs()
+  : d_printUsage(false)
+{}
 
 CommandlineArgs::~CommandlineArgs() {}
 

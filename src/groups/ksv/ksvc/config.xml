@@ -1,6 +1,12 @@
 <config>
 
   <keyStore>
+    <backend>memory</backend>
+    <maxCachedObjects>1000</maxCachedObjects>
   </keyStore>
+
+  <crypto>
+    <backend>dummy</backend>
+  </crypto>
   
 </config>

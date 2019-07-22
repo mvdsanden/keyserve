@@ -1,10 +1,13 @@
 // m_keyserve.m.cpp                                              -*-c++-*-
+#include <a_kscrypt_cryptofactory.h>
+#include <a_kstor_keystorefactory.h>
+#include <ksvc_cachingkeystore.h>
 #include <ksvc_commandlineargs.h>
 #include <ksvc_configuration.h>
 #include <ksvc_configurationutil.h>
+#include <ksvc_crypto.h>
 #include <ksvc_keystore.h>
-#include <a_kstor_keystorefactory.h>
-// #include <ksrv_cachingkeystore.h>
+#include <ksvc_keymanager.h>
 // #include <ksrv_servicefactory.h>
 // #include <a_ksrvs_servicefactory.h>
 
@@ -53,18 +56,21 @@ int main(int argc, char *argv[])
   //   return 4;
   // }
 
-  // a_kscrypto::CryptoFactory cryptoFactory(config);
-  // std::unique_ptr<ksrv::Crypto> crypto = cryptoFactory.create();
-  // if (!crypto) {
-  //   return 5;
-  // }
+  a_kscrypt::CryptoFactory     cryptoFactory(config.crypto());
+  std::unique_ptr<ksvc::Crypto> crypto = cryptoFactory.create();
+  if (!crypto) {
+    return 5;
+  }
 
   // if (!crypto.start()) {
   //   return 6;
   // }
 
-  // ksrv::CachingKeyStore   cachingKeyStore(keyStore.get(), config);
-  // ksrv::KeyManager        keyManager(&cachingKeyStore, crypto.get(), config);
+  ksvc::CachingKeyStore cachingKeyStore(keyStore.get(), config.keyStore());
+
+  std::unique_ptr<ksvc::KeyManager> keyManager(
+      ksvc::KeyManager::create(&cachingKeyStore, crypto.get(), config));
+
   // ksrv::SecuredKeyManager securedKeyManager(&keyManager, config);
   // // - SecuredKeyManager friends SecurityManager so that it can only access KeyManagerSessions (private: SecuredKeyManager::createSession(domains...)?)?
   // // - SecuredKeyManagerSessions are wrappers around KeyManager that perform access checks.
