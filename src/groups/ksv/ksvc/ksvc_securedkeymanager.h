@@ -2,8 +2,16 @@
 #ifndef INCLUDED_KSVC_SECUREDKEYMANAGER
 #define INCLUDED_KSVC_SECUREDKEYMANAGER
 
+#include <memory>
+
 namespace MvdS {
 namespace ksvc {
+
+// Forward declarations.
+class KeyManager;
+class SecurityContext;
+class Configuration;
+class SecuredKeyManagerSession;
 
 // ========================
 // Class: SecuredKeyManager
@@ -19,7 +27,7 @@ class SecuredKeyManager
   // TYPES
 
   // DATA
-  KeyManager *d_manager;
+  KeyManager *d_keyManager;
 
   // PRIVATE MANIPULATORS
   std::unique_ptr<SecuredKeyManagerSession>

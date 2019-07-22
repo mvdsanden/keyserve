@@ -257,7 +257,7 @@ TEST(KeyManagerTest, createCryptoKey)
       ksvc::SYMMETRIC_ENCRYPTION};
 
   for (auto algorithm : algos) {
-    name += "0";
+    id += "_";
     
     cryptoKey.mutable_versiontemplate()->set_algorithm(algorithm);
 

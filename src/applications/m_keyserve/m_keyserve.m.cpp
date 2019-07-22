@@ -8,6 +8,7 @@
 #include <ksvc_crypto.h>
 #include <ksvc_keystore.h>
 #include <ksvc_keymanager.h>
+#include <ksvc_securedkeymanager.h>
 // #include <ksrv_servicefactory.h>
 // #include <a_ksrvs_servicefactory.h>
 
@@ -71,7 +72,8 @@ int main(int argc, char *argv[])
   std::unique_ptr<ksvc::KeyManager> keyManager(
       ksvc::KeyManager::create(&cachingKeyStore, crypto.get(), config));
 
-  // ksrv::SecuredKeyManager securedKeyManager(&keyManager, config);
+  ksvc::SecuredKeyManager securedKeyManager(keyManager.get(), config);
+  
   // // - SecuredKeyManager friends SecurityManager so that it can only access KeyManagerSessions (private: SecuredKeyManager::createSession(domains...)?)?
   // // - SecuredKeyManagerSessions are wrappers around KeyManager that perform access checks.
 
