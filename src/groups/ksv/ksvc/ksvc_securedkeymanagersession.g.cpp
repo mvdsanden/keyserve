@@ -195,12 +195,12 @@ public:
 class TestingSecurityContext : public SecurityContext
 {  
 public:
-  bool d_result = true;
+  std::unordered_set<std::string> d_validParents;
 
   virtual void validateParent(std::function<void(bool)> result,
                               std::string               parent) const
   {
-    result(d_result);
+    result(d_validParents.find(parent) != d_validParents.end());
   }
 };
 
@@ -237,7 +237,18 @@ TEST(SecuredKeyManagerSessionTest, createKeyRing)
   std::string name   = parent + "/" + id;
 
   KeyRing keyRing;
-  
+
+  // Invalid parent should cause failure.
+  obj.createKeyRing(
+      [](auto status, auto keyRing) {
+        ASSERT_EQ(status, ResultStatus::e_denied);
+      },
+      parent,
+      id,
+      keyRing);
+
+  // Valid parent should not cause failure.
+  securityContext.d_validParents.emplace(parent);
   obj.createKeyRing(
       [](auto status, auto keyRing) {
         ASSERT_EQ(status, ResultStatus::e_success);
@@ -246,6 +257,7 @@ TEST(SecuredKeyManagerSessionTest, createKeyRing)
       id,
       keyRing);
 
+  // Invalid id should cause failure.
   obj.createKeyRing(
       [](auto status, auto keyRing) {
         ASSERT_EQ(status, ResultStatus::e_denied);
@@ -270,7 +282,18 @@ TEST(SecuredKeyManagerSessionTest, createCryptoKey)
   std::string name   = parent + "/" + id;
 
   CryptoKey cryptoKey;
-  
+
+  // Invalid parent should cause failure.
+  obj.createCryptoKey(
+      [](auto status, auto obj) {
+        ASSERT_EQ(status, ResultStatus::e_denied);
+      },
+      parent,
+      id,
+      cryptoKey);
+
+  // Valid parent should not cause failure.
+  securityContext.d_validParents.emplace(parent);
   obj.createCryptoKey(
       [](auto status, auto obj) {
         ASSERT_EQ(status, ResultStatus::e_success);
@@ -279,6 +302,7 @@ TEST(SecuredKeyManagerSessionTest, createCryptoKey)
       id,
       cryptoKey);
 
+  // Invalid id should cause failure.
   obj.createCryptoKey(
       [](auto status, auto obj) {
         ASSERT_EQ(status, ResultStatus::e_denied);

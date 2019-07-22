@@ -94,15 +94,16 @@ void SecuredKeyManagerSession::createKeyRing(
   PipelineCall<KeyRing> call = std::bind(&KeyManager::createKeyRing,
                                          d_keyManager,
                                          _1,
-                                         std::move(parent),
+                                         parent,
                                          std::move(keyRingId),
                                          std::move(keyRing));
 
-  validationPipeline(
-      std::move(result),
-      std::move(call),
-      std::bind(
-          &SecurityContext::validateParent, &d_securityContext, _1, parent));
+  validationPipeline(std::move(result),
+                     std::move(call),
+                     std::bind(&SecurityContext::validateParent,
+                               &d_securityContext,
+                               _1,
+                               std::move(parent)));
 }
 
 void SecuredKeyManagerSession::createCryptoKey(
@@ -122,16 +123,17 @@ void SecuredKeyManagerSession::createCryptoKey(
   PipelineCall<CryptoKey> call = std::bind(&KeyManager::createCryptoKey,
                                            d_keyManager,
                                            _1,
-                                           std::move(parent),
+                                           parent,
                                            std::move(cryptoKeyId),
                                            std::move(cryptoKey),
                                            skipInitialVersionCreation);
 
-  validationPipeline(
-      std::move(result),
-      std::move(call),
-      std::bind(
-          &SecurityContext::validateParent, &d_securityContext, _1, parent));
+  validationPipeline(std::move(result),
+                     std::move(call),
+                     std::bind(&SecurityContext::validateParent,
+                               &d_securityContext,
+                               _1,
+                               std::move(parent)));
 }
 
 // ACCESSORS
