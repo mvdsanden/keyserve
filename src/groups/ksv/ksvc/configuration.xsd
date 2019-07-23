@@ -16,11 +16,18 @@
       <xs:element name='backend' type='xs:string' default='dummy'/>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name='ServiceConfig'>
+    <xs:sequence>
+      <xs:element name='type' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
   
   <xs:complexType name='Configuration'>
     <xs:sequence>
       <xs:element name="keyStore" type="KeyStoreConfig"/>
       <xs:element name="crypto" type="CryptoConfig"/>
+      <xs:element name="service" type="ServiceConfig" maxOccurs='128'/>
     </xs:sequence>
   </xs:complexType>
 

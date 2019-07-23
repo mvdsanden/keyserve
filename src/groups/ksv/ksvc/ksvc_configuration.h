@@ -57,6 +57,28 @@ const std::string& backend() const { return d_backend;}
 
 bool operator>>(const kdadm::Element &element, CryptoConfig& obj);
 // -------------------
+// class ServiceConfig
+// -------------------
+class ServiceConfig
+{
+// DATA
+std::string d_type;
+public:
+// CREATORS
+// MANIPULATOR
+std::string& type() { return d_type;}
+// ACCESSORS
+const std::string& type() const { return d_type;}
+}; // class ServiceConfig
+
+// --- inline methods ---
+
+// -------------------
+// Class ServiceConfig
+// -------------------
+
+bool operator>>(const kdadm::Element &element, ServiceConfig& obj);
+// -------------------
 // class Configuration
 // -------------------
 class Configuration
@@ -64,14 +86,17 @@ class Configuration
 // DATA
 KeyStoreConfig d_keyStore;
 CryptoConfig d_crypto;
+std::vector<ServiceConfig> d_service;
 public:
 // CREATORS
 // MANIPULATOR
 KeyStoreConfig& keyStore() { return d_keyStore;}
 CryptoConfig& crypto() { return d_crypto;}
+std::vector<ServiceConfig>& service() { return d_service;}
 // ACCESSORS
 const KeyStoreConfig& keyStore() const { return d_keyStore;}
 const CryptoConfig& crypto() const { return d_crypto;}
+const std::vector<ServiceConfig>& service() const { return d_service;}
 }; // class Configuration
 
 // --- inline methods ---

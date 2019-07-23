@@ -68,6 +68,28 @@ bool operator>>(const kdadm::Element &element, CryptoConfig& obj)
 
   return true;
 }
+bool operator>>(const kdadm::Element &element, ServiceConfig& obj)
+{
+  { // BEGIN type
+    auto iter = kdadm::ElementUtils::getElementByTagName(
+      "type",
+      element.children().begin(),
+      element.children().end());
+
+    if (iter == element.children().end()) {
+      spdlog::error("{}: expected element '{}'",
+        element.location(), "type");
+      return false;
+    }
+
+    if (!(**iter >> obj.type())) {
+      spdlog::error("{}: expected xs:string value", (*iter)->location());
+      return false;
+    }
+  } // END type
+
+  return true;
+}
 bool operator>>(const kdadm::Element &element, Configuration& obj)
 {
   { // BEGIN keyStore
@@ -105,6 +127,24 @@ bool operator>>(const kdadm::Element &element, Configuration& obj)
       return false;
     }
   } // END crypto
+
+  { // BEGIN service
+    bool success = true;
+    element.getElementsByTagName(
+      "service",
+      [&obj, &success](const auto& e){
+        success = success && (*e >> obj.service().emplace_back());
+      });
+
+    if (!success) {
+      return false;
+    }
+
+    if (1 > obj.service().size()) {
+      spdlog::error("{}: expected at least 1 elements with name 'service'",
+        element.location());
+    }
+  } // END service
 
   return true;
 }

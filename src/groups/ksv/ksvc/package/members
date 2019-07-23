@@ -16,3 +16,4 @@ ksvc_securedkeymanager
 ksvc_securedkeymanagersession
 ksvc_securitymanager
 ksvc_securitycredentials
+ksvc_service

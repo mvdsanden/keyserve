@@ -8,5 +8,9 @@
   <crypto>
     <backend>dummy</backend>
   </crypto>
+
+  <service>
+    <type>grpc</type>
+  </service>
   
 </config>

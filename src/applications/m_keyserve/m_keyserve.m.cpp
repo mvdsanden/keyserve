@@ -10,8 +10,10 @@
 #include <ksvc_keymanager.h>
 #include <ksvc_securedkeymanager.h>
 #include <ksvc_securitymanager.h>
-// #include <ksrv_servicefactory.h>
-// #include <a_ksrvs_servicefactory.h>
+#include <ksvc_service.h>
+#include <a_ksrvs_servicefactory.h>
+
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 #include <memory>
@@ -20,17 +22,26 @@ using namespace MvdS;
 
 namespace {
 
-  // bool startAllServices(ksrv::ServiceFactory::Services* services)
-  // {
-  //   size_t success = 0;
+bool startAllServices(a_ksrvs::ServiceFactory::Services *services)
+{
+  size_t success = 0;
 
-  //   for (auto &service : services) {
-  //     success += service->start()?1:0;      
-  //   }
+  for (auto &service : *services) {
 
-  //   return 0 != success;
-  // }
-  
+    if (!service) {
+      continue;
+    }
+
+    service->start();
+    
+    ++success;
+  }
+
+  spdlog::info("Started {} services", success);
+
+  return 0 != success;
+}
+
 } // anonymouse namespace
 
 int main(int argc, char *argv[])
@@ -78,14 +89,14 @@ int main(int argc, char *argv[])
 
   // // Service sessions should get access to the key manager by entering a secure
   // // session through the security manager!!
-  // a_ksvcs::ServiceFactory        serviceFactory(&securityManager, config);
-  // ksrv::ServiceFactory::Services services;
-  // serviceFactory.createConfigured(&services);
+  a_ksrvs::ServiceFactory           serviceFactory(&securityManager, config);
+  a_ksrvs::ServiceFactory::Services services =
+      serviceFactory.createConfigured();
 
-  // if (!startAllServices(&services)) {
-  //   LOG_ERR("No services started");
-  //   return 7;
-  // }
+  if (!startAllServices(&services)) {
+    //    LOG_ERR("No services started");
+    return 7;
+  }
 
   return 0;
 }
