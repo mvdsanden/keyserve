@@ -59,3 +59,21 @@ Since I'm using the C++17 please use g++-8 for compiling.
 
 As I am planning to use gRPC I compiled and installed a recent stable version of gRPC
 as well as its companion protobuf library.
+
+## Adding code
+
+When adding classes (components), please take a look at `src/scripts/add_class.sh`, which
+should be run from within the appropriate package group, adapter or application directories.
+
+### Members
+All components need to be listed inside the `[package|adapter|application]/members` files
+for compiling.
+
+### Dependencies
+All dependencies need to be listed inside the `[package|adapter|application]/members` files.
+
+### Coding standards
+
+This project loosly follows the Bloomberg Development Environment team coding standards.
+
+* [BDE Coding Standards](https://github.com/bloomberg/bde/wiki/Introduction-to-BDE-Coding-Standards)
