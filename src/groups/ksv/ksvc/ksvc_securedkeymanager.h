@@ -31,7 +31,7 @@ class SecuredKeyManager
 
   // PRIVATE MANIPULATORS
   std::unique_ptr<SecuredKeyManagerSession>
-  createSession(const SecurityContext &securityContext);
+  createSession(std::shared_ptr<SecurityContext> securityContext);
 
 public:
   // CREATORS

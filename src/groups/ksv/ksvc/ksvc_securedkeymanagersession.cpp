@@ -72,9 +72,9 @@ void validationPipeline(ResultType result,
 
 // CREATORS
 SecuredKeyManagerSession::SecuredKeyManagerSession(
-    const SecurityContext &securityContext, KeyManager *keyManager)
-    : d_securityContext(securityContext)
-    , d_keyManager(keyManager)
+    std::shared_ptr<SecurityContext> securityContext, KeyManager *keyManager)
+    : d_securityContext(std::move(securityContext))
+    , d_keyManager(std::move(keyManager))
 {}
 
 // MANIPULATORS
@@ -101,7 +101,7 @@ void SecuredKeyManagerSession::createKeyRing(
   validationPipeline(std::move(result),
                      std::move(call),
                      std::bind(&SecurityContext::validateParent,
-                               &d_securityContext,
+                               d_securityContext.get(),
                                _1,
                                std::move(parent)));
 }
@@ -131,7 +131,7 @@ void SecuredKeyManagerSession::createCryptoKey(
   validationPipeline(std::move(result),
                      std::move(call),
                      std::bind(&SecurityContext::validateParent,
-                               &d_securityContext,
+                               d_securityContext.get(),
                                _1,
                                std::move(parent)));
 }

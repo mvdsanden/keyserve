@@ -1,6 +1,7 @@
 // ksvc_securedkeymanager.cpp                                         -*-c++-*-
 #include <ksvc_securedkeymanager.h>
 #include <ksvc_securedkeymanagersession.h>
+#include <ksvc_securitycontext.h>
 
 namespace MvdS {
 namespace ksvc {
@@ -10,10 +11,10 @@ namespace ksvc {
 // ------------------------
 
 // PRIVATE MANIPULATORS
-std::unique_ptr<SecuredKeyManagerSession>
-SecuredKeyManager::createSession(const SecurityContext &securityContext)
+std::unique_ptr<SecuredKeyManagerSession> SecuredKeyManager::createSession(
+    std::shared_ptr<SecurityContext> securityContext)
 {
-  return std::make_unique<SecuredKeyManagerSession>(securityContext,
+  return std::make_unique<SecuredKeyManagerSession>(std::move(securityContext),
                                                     d_keyManager);
 }
 

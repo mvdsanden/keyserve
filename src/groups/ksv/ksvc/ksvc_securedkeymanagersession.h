@@ -26,15 +26,15 @@ class SecuredKeyManagerSession : public KeyManager
   // TYPES
 
   // DATA
-  const SecurityContext &d_securityContext;
-  KeyManager *           d_keyManager;
+  std::shared_ptr<SecurityContext> d_securityContext;
+  KeyManager *                     d_keyManager;
 
   // PRIVATE MANIPULATORS
 
 public:
   // CREATORS
-  SecuredKeyManagerSession(const SecurityContext &securityContext,
-                           KeyManager *           keyManager);
+  SecuredKeyManagerSession(std::shared_ptr<SecurityContext> securityContext,
+                           KeyManager *                     keyManager);
   // Create secured key manager session using the specified 'securityContext'
   // and the specified 'keyManager'.
 

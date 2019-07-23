@@ -218,7 +218,7 @@ TEST(SecuredKeyManagerSessionTest, Constructor)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  TestingSecurityContext   securityContext;
+  auto securityContext = std::make_shared<TestingSecurityContext>();
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 }
 
@@ -229,7 +229,7 @@ TEST(SecuredKeyManagerSessionTest, createKeyRing)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  TestingSecurityContext   securityContext;
+  auto securityContext = std::make_shared<TestingSecurityContext>();
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 
   std::string parent = "projects/test/locations/A/keyRings";
@@ -248,7 +248,7 @@ TEST(SecuredKeyManagerSessionTest, createKeyRing)
       keyRing);
 
   // Valid parent should not cause failure.
-  securityContext.d_validParents.emplace(parent);
+  securityContext->d_validParents.emplace(parent);
   obj.createKeyRing(
       [](auto status, auto keyRing) {
         ASSERT_EQ(status, ResultStatus::e_success);
@@ -274,7 +274,7 @@ TEST(SecuredKeyManagerSessionTest, createCryptoKey)
   TestingCrypto               crypto;
   std::unique_ptr<KeyManager> keyManager(
       KeyManager::create(&keyStore, &crypto, config));
-  TestingSecurityContext   securityContext;
+  auto securityContext = std::make_shared<TestingSecurityContext>();
   SecuredKeyManagerSession obj(securityContext, keyManager.get());
 
   std::string parent = "projects/test/locations/A/cryptoKeys";
@@ -293,7 +293,7 @@ TEST(SecuredKeyManagerSessionTest, createCryptoKey)
       cryptoKey);
 
   // Valid parent should not cause failure.
-  securityContext.d_validParents.emplace(parent);
+  securityContext->d_validParents.emplace(parent);
   obj.createCryptoKey(
       [](auto status, auto obj) {
         ASSERT_EQ(status, ResultStatus::e_success);
