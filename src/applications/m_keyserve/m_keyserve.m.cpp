@@ -9,6 +9,7 @@
 #include <ksvc_keystore.h>
 #include <ksvc_keymanager.h>
 #include <ksvc_securedkeymanager.h>
+#include <ksvc_securitymanager.h>
 // #include <ksrv_servicefactory.h>
 // #include <a_ksrvs_servicefactory.h>
 
@@ -73,12 +74,7 @@ int main(int argc, char *argv[])
       ksvc::KeyManager::create(&cachingKeyStore, crypto.get(), config));
 
   ksvc::SecuredKeyManager securedKeyManager(keyManager.get(), config);
-  
-  // // - SecuredKeyManager friends SecurityManager so that it can only access KeyManagerSessions (private: SecuredKeyManager::createSession(domains...)?)?
-  // // - SecuredKeyManagerSessions are wrappers around KeyManager that perform access checks.
-
-
-  // ksrv::SecurityManager securityManager(&securedKeyManager, config);
+  ksvc::SecurityManager   securityManager(&securedKeyManager /*, config*/);
 
   // // Service sessions should get access to the key manager by entering a secure
   // // session through the security manager!!
