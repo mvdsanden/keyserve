@@ -51,7 +51,8 @@ cd src/groups/ksv/ksvc
 
 #### G++-8
 
-Since I'm using the C++17 please use g++-8 for compiling.
+The project uses C++17 so please use g++-8 for compiling. I did not test it with
+clang.
 
 #### cmake
 
