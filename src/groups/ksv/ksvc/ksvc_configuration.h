@@ -1,4 +1,5 @@
 // ksvc_configuration.h                                               -*-c++-*-
+// This file is auto generated, don't edit directly.
 #include <kdadm_element.h>
 #include <optional>
 #include <spdlog/spdlog.h>

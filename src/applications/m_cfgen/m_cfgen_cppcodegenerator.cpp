@@ -651,7 +651,8 @@ struct Context
   void beginDocument(std::ostream &stream, const std::string &filename) const
   {
     stream << "// " << filename << std::string(80 - filename.size() - 13, ' ')
-           << "-*-c++-*-\n";
+           << "-*-c++-*-\n"
+	   << "// This file is auto generated, don't edit directly.\n";
   }
 
   void beginNamespaces(std::ostream &stream) const

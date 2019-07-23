@@ -1,4 +1,5 @@
 // ksvc_configuration.cpp                                             -*-c++-*-
+// This file is auto generated, don't edit directly.
 #include <ksvc_configuration.h>
 #include <spdlog/fmt/bundled/ostream.h>
 
