@@ -9,7 +9,7 @@ api.
 
 The project is subdivided into the following directories:
 
-* */src/script:* Helper scripts for the project.
+* */src/scripts:* Helper scripts for the project.
 * */src/modules:* Cmake modules.
 * */src/applications/$application:* Source code for separate applications.
 * */src/adapters/$adapter:* Source code for adapter libraries.
@@ -39,7 +39,7 @@ cmake ../src
 make -j8
 ```
 
-If the protobuf files don't compile, that is because your protobuf libraries
+If the protobuf files have compilation errors, this is because your protobuf libraries
 are from a different version of protobuf. Please do the following then:
 
 ```
