@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "ksvc_keyring.proto";
+import "ksvc_cryptokey.proto";
+
+package MvdS.ksvc;
+
+service KeyserveService {
+
+  rpc CreateKeyRing   (CreateKeyRingRequest)   returns (KeyRing)   {}
+  rpc CreateCryptoKey (CreateCryptoKeyRequest) returns (CryptoKey) {}
+
+}
+
+message CreateKeyRingRequest {
+  string  parent    = 1;
+  string  keyRingId = 2;
+  KeyRing keyRing   = 3;
+}
+
+message CreateCryptoKeyRequest {
+  string    parent                     = 1;
+  string    cryptoKeyId                = 2;
+  CryptoKey cryptoKey                  = 3;
+  bool      skipInitialVersionCreation = 4;
+}

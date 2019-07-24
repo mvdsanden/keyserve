@@ -22,7 +22,8 @@ struct ResultStatus
     e_timedOut,
     e_waiting,
     e_exists,
-    e_denied
+    e_denied,
+    e_resourceExhausted,
   };
 
   // DATA

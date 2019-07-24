@@ -9,6 +9,8 @@ ksvc_cryptokey.pb
 ksvc_cryptokeyversion.pb
 ksvc_cryptokeyversiontemplate.pb
 ksvc_cryptokeyversionalgorithm.pb
+ksvc_keyserveservice.pb
+ksvc_keyserveservice.grpc.pb
 ksvc_resultfunction
 ksvc_crypto
 ksvc_securitycontext
@@ -17,3 +19,4 @@ ksvc_securedkeymanagersession
 ksvc_securitymanager
 ksvc_securitycredentials
 ksvc_service
+ksvc_requesthandler
