@@ -75,6 +75,6 @@ All dependencies need to be listed inside the `[package|adapter|application]/mem
 
 ### Coding standards
 
-This project loosly follows the Bloomberg Development Environment team coding standards.
+This project loosely follows the Bloomberg Development Environment team coding standards.
 
 * [BDE Coding Standards](https://github.com/bloomberg/bde/wiki/Introduction-to-BDE-Coding-Standards)
