@@ -8,23 +8,33 @@
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
+#include <google/protobuf/wire_format_lite_inl.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/generated_message_reflection.h>
 #include <google/protobuf/reflection_ops.h>
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+
 namespace MvdS {
 namespace ksvc {
 }  // namespace ksvc
 }  // namespace MvdS
-static constexpr ::PROTOBUF_NAMESPACE_ID::Metadata* file_level_metadata_ksvc_5fcryptokeyversionalgorithm_2eproto = nullptr;
-static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto[1];
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto = nullptr;
-const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_ksvc_5fcryptokeyversionalgorithm_2eproto::offsets[1] = {};
-static constexpr ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema* schemas = nullptr;
-static constexpr ::PROTOBUF_NAMESPACE_ID::Message* const* file_default_instances = nullptr;
+void InitDefaults_ksvc_5fcryptokeyversionalgorithm_2eproto() {
+}
+
+constexpr ::google::protobuf::Metadata* file_level_metadata_ksvc_5fcryptokeyversionalgorithm_2eproto = nullptr;
+const ::google::protobuf::EnumDescriptor* file_level_enum_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto[1];
+constexpr ::google::protobuf::ServiceDescriptor const** file_level_service_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto = nullptr;
+const ::google::protobuf::uint32 TableStruct_ksvc_5fcryptokeyversionalgorithm_2eproto::offsets[1] = {};
+static constexpr ::google::protobuf::internal::MigrationSchema* schemas = nullptr;
+static constexpr ::google::protobuf::Message* const* file_default_instances = nullptr;
+
+::google::protobuf::internal::AssignDescriptorsTable assign_descriptors_table_ksvc_5fcryptokeyversionalgorithm_2eproto = {
+  {}, AddDescriptors_ksvc_5fcryptokeyversionalgorithm_2eproto, "ksvc_cryptokeyversionalgorithm.proto", schemas,
+  file_default_instances, TableStruct_ksvc_5fcryptokeyversionalgorithm_2eproto::offsets,
+  file_level_metadata_ksvc_5fcryptokeyversionalgorithm_2eproto, 0, file_level_enum_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto, file_level_service_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto,
+};
 
 const char descriptor_table_protodef_ksvc_5fcryptokeyversionalgorithm_2eproto[] =
   "\n$ksvc_cryptokeyversionalgorithm.proto\022\t"
@@ -32,25 +42,25 @@ const char descriptor_table_protodef_ksvc_5fcryptokeyversionalgorithm_2eproto[] 
   "\n(CRYPTO_KEY_VERSION_ALOGRITHM_UNSPECIFI"
   "ED\020\000\022\030\n\024SYMMETRIC_ENCRYPTION\020\001b\006proto3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_deps[1] = {
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_sccs[1] = {
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_once;
-static bool descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_initialized = false;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto = {
-  &descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_initialized, descriptor_table_protodef_ksvc_5fcryptokeyversionalgorithm_2eproto, "ksvc_cryptokeyversionalgorithm.proto", 158,
-  &descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_once, descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_sccs, descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto_deps, 0, 0,
-  schemas, file_default_instances, TableStruct_ksvc_5fcryptokeyversionalgorithm_2eproto::offsets,
-  file_level_metadata_ksvc_5fcryptokeyversionalgorithm_2eproto, 0, file_level_enum_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto, file_level_service_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto,
+::google::protobuf::internal::DescriptorTable descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto = {
+  false, InitDefaults_ksvc_5fcryptokeyversionalgorithm_2eproto, 
+  descriptor_table_protodef_ksvc_5fcryptokeyversionalgorithm_2eproto,
+  "ksvc_cryptokeyversionalgorithm.proto", &assign_descriptors_table_ksvc_5fcryptokeyversionalgorithm_2eproto, 158,
 };
 
+void AddDescriptors_ksvc_5fcryptokeyversionalgorithm_2eproto() {
+  static constexpr ::google::protobuf::internal::InitFunc deps[1] =
+  {
+  };
+ ::google::protobuf::internal::AddDescriptors(&descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto, deps, 0);
+}
+
 // Force running AddDescriptors() at dynamic initialization time.
-static bool dynamic_init_dummy_ksvc_5fcryptokeyversionalgorithm_2eproto = (  ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto), true);
+static bool dynamic_init_dummy_ksvc_5fcryptokeyversionalgorithm_2eproto = []() { AddDescriptors_ksvc_5fcryptokeyversionalgorithm_2eproto(); return true; }();
 namespace MvdS {
 namespace ksvc {
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* CryptoKeyVersionAlgorithm_descriptor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_ksvc_5fcryptokeyversionalgorithm_2eproto);
+const ::google::protobuf::EnumDescriptor* CryptoKeyVersionAlgorithm_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&assign_descriptors_table_ksvc_5fcryptokeyversionalgorithm_2eproto);
   return file_level_enum_descriptors_ksvc_5fcryptokeyversionalgorithm_2eproto[0];
 }
 bool CryptoKeyVersionAlgorithm_IsValid(int value) {
@@ -67,8 +77,10 @@ bool CryptoKeyVersionAlgorithm_IsValid(int value) {
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace ksvc
 }  // namespace MvdS
-PROTOBUF_NAMESPACE_OPEN
-PROTOBUF_NAMESPACE_CLOSE
+namespace google {
+namespace protobuf {
+}  // namespace protobuf
+}  // namespace google
 
 // @@protoc_insertion_point(global_scope)
 #include <google/protobuf/port_undef.inc>
